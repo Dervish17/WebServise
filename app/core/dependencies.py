@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from sqlalchemy.orm import Session
 
+from app.core.enums import UserRole
 from app.db.session import get_db
 from app.models.user import User
 from app.core.config import SECRET_KEY, ALGORITHM
@@ -26,3 +27,14 @@ def get_current_user(
         raise HTTPException(status_code=401, detail="User not found")
 
     return user
+
+def require_roles(*roles: UserRole):
+    def role_checker(current_user = Depends(get_current_user)):
+        if current_user.role not in [role.value for role in roles]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Недостаточно прав"
+            )
+        return current_user
+
+    return role_checker

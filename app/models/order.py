@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
 from datetime import datetime
 from app.db.database import Base
+from app.core.enums import OrderStatus
 
 
 class Order(Base):
@@ -10,7 +11,7 @@ class Order(Base):
 
     title = Column(String)
     description = Column(String)
-    status = Column(String, default="new")
+    status = Column(String, default=OrderStatus.new.value)
 
     client_id = Column(Integer, ForeignKey("clients.id"))
     equipment_id = Column(Integer, ForeignKey("equipment.id"))
