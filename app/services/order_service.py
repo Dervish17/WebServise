@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.enums import OrderStatus
 from app.models.equipment import Equipment
@@ -38,6 +38,7 @@ def create_order(
     description: str,
     equipment_id: int,
     current_user: User,
+    total_cost=None,
 ) -> Order:
     equipment = db.query(Equipment).filter(Equipment.id == equipment_id).first()
 
@@ -54,6 +55,7 @@ def create_order(
         client_id=equipment.client_id,
         created_by=current_user.id,
         status=OrderStatus.new.value,
+        total_cost=total_cost,
     )
 
     db.add(order)
@@ -80,8 +82,16 @@ def filter_orders(
     created_by: int | None = None,
     limit: int = 10,
     offset: int = 0,
-) -> list[type[Order]]:
-    query = db.query(Order)
+) -> list[Order]:
+    query = (
+        db.query(Order)
+        .options(
+            joinedload(Order.client),
+            joinedload(Order.equipment),
+            joinedload(Order.creator),
+            joinedload(Order.assignee),
+        )
+    )
 
     if status:
         query = query.filter(Order.status == status)
@@ -103,8 +113,18 @@ def filter_orders(
     )
 
 
-def get_order_by_id(db: Session, order_id: int) -> type[Order]:
-    order = db.query(Order).filter(Order.id == order_id).first()
+def get_order_by_id(db: Session, order_id: int) -> Order:
+    order = (
+        db.query(Order)
+        .options(
+            joinedload(Order.client),
+            joinedload(Order.equipment),
+            joinedload(Order.creator),
+            joinedload(Order.assignee),
+        )
+        .filter(Order.id == order_id)
+        .first()
+    )
 
     if not order:
         raise HTTPException(
@@ -120,7 +140,7 @@ def assign_order(
     order_id: int,
     user_id: int,
     current_user: User,
-) -> type[Order]:
+) -> Order:
     order = get_order_by_id(db, order_id)
 
     user = db.query(User).filter(User.id == user_id).first()
@@ -163,7 +183,7 @@ def change_status(
     order_id: int,
     new_status: OrderStatus,
     current_user: User,
-) -> type[Order]:
+) -> Order:
     order = get_order_by_id(db, order_id)
 
     allowed = ALLOWED_TRANSITIONS.get(order.status, [])

@@ -24,6 +24,7 @@ def create_client_endpoint(
         phone=data.phone,
         email=data.email,
         address=data.address,
+        notes=data.notes,
     )
 
 

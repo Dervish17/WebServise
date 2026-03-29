@@ -1,0 +1,34 @@
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Статус</th>
+            <th>Клиент</th>
+            <th>Оборудование</th>
+            <th>Инженер</th>
+            <th>Стоимость</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for order in orders %}
+        <tr
+            style="cursor: pointer;"
+            hx-get="/app/orders/{{ order.id }}/detail"
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            <td>{{ order.id }}</td>
+            <td>{{ order.title }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.client.name if order.client else "-" }}</td>
+            <td>{{ order.equipment.name if order.equipment else "-" }}</td>
+            <td>{{ order.assignee.email if order.assignee else "-" }}</td>
+            <td>{{ order.total_cost if order.total_cost is not none else "-" }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="7">Заявок нет</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

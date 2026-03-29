@@ -9,6 +9,7 @@ class ClientCreate(BaseModel):
     phone: str | None = None
     email: EmailStr | None = None
     address: str | None = None
+    notes: str | None = None
 
 
 class ClientResponse(BaseModel):
@@ -20,4 +21,5 @@ class ClientResponse(BaseModel):
     phone: str | None
     email: EmailStr | None
     address: str | None
+    notes: str | None
     created_at: datetime

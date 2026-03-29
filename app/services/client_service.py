@@ -11,6 +11,7 @@ def create_client(
     phone: str | None = None,
     email: str | None = None,
     address: str | None = None,
+    notes: str | None = None,
 ) -> Client:
     client = Client(
         name=name,
@@ -18,6 +19,7 @@ def create_client(
         phone=phone,
         email=email,
         address=address,
+        notes=notes,
     )
 
     db.add(client)

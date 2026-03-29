@@ -20,6 +20,7 @@ from app.services.order_service import (
     change_status,
     create_order,
     filter_orders,
+    get_order_by_id,
 )
 
 router = APIRouter(prefix="/orders", tags=["orders"])
@@ -37,6 +38,7 @@ def create_order_endpoint(
         description=order.description,
         equipment_id=order.equipment_id,
         current_user=current_user,
+        total_cost=order.total_cost,
     )
 
 
@@ -63,15 +65,7 @@ def get_orders(
 
 @router.get("/{order_id}", response_model=OrderResponse)
 def get_order(order_id: int, db: Session = Depends(get_db)):
-    order = db.query(Order).filter(Order.id == order_id).first()
-
-    if not order:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Order not found",
-        )
-
-    return order
+    return get_order_by_id(db, order_id)
 
 
 @router.put("/{order_id}/assign", response_model=OrderResponse)

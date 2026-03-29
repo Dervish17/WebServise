@@ -1,5 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
+
+from sqlalchemy.orm import relationship
+
 from app.db.database import Base
 
 
@@ -12,3 +15,14 @@ class User(Base):
     role = Column(String, nullable=False, default='engineer')
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    created_orders = relationship(
+        "Order",
+        foreign_keys="Order.created_by",
+        back_populates="creator",
+    )
+    assigned_orders = relationship(
+        "Order",
+        foreign_keys="Order.assigned_to",
+        back_populates="assignee",
+    )

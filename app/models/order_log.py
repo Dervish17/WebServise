@@ -1,5 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Text
 from datetime import datetime
+
+from sqlalchemy.orm import relationship
+
 from app.db.database import Base
 
 
@@ -16,3 +19,5 @@ class OrderLog(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    order = relationship("Order", back_populates="logs")

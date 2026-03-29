@@ -1,0 +1,74 @@
+<h3>Заявка #{{ order.id }}</h3>
+
+<p><strong>Название:</strong> {{ order.title }}</p>
+<p><strong>Описание:</strong> {{ order.description }}</p>
+<p><strong>Статус:</strong> {{ order.status }}</p>
+
+<div style="margin-bottom: 12px;">
+    {% if order.status == "new" %}
+        <button
+            hx-post="/app/orders/{{ order.id }}/status"
+            hx-vals='{"new_status":"in_progress"}'
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            Перевести в работу
+        </button>
+    {% elif order.status == "in_progress" %}
+        <button
+            hx-post="/app/orders/{{ order.id }}/status"
+            hx-vals='{"new_status":"done"}'
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            Завершить
+        </button>
+    {% elif order.status == "done" %}
+        <span>Заявка завершена</span>
+    {% endif %}
+</div>
+<p><strong>Клиент:</strong> {{ order.client.name if order.client else "-" }}</p>
+<p><strong>Оборудование:</strong> {{ order.equipment.name if order.equipment else "-" }}</p>
+<p><strong>Создал:</strong> {{ order.creator.email if order.creator else "-" }}</p>
+<p><strong>Исполнитель:</strong> {{ order.assignee.email if order.assignee else "-" }}</p>
+<form
+    hx-post="/app/orders/{{ order.id }}/assign"
+    hx-target="#order-detail"
+    hx-swap="innerHTML"
+    style="margin-bottom: 12px;">
+    <select name="user_id" style="width: 50%; min-width: 220px; margin-bottom: 8px;">
+        {% for engineer in engineers %}
+            <option value="{{ engineer.id }}"
+                {% if order.assigned_to == engineer.id %}selected{% endif %}>
+                {{ engineer.email }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Назначить инженера</button>
+</form>
+<p><strong>Стоимость:</strong> {{ order.total_cost if order.total_cost is not none else "-" }}</p>
+
+<hr>
+
+<h4>Добавить комментарий</h4>
+
+<form
+    hx-post="/app/orders/{{ order.id }}/comment"
+    hx-target="#order-detail"
+    hx-swap="innerHTML">
+    <textarea name="text" rows="4" style="width: 100%;"></textarea>
+    <br>
+    <button type="submit">Добавить</button>
+</form>
+
+<hr>
+
+<h4>Комментарии</h4>
+
+{% for comment in comments %}
+    <div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ddd;">
+        <div><strong>{{ comment.user_id }}</strong></div>
+        <div>{{ comment.description }}</div>
+        <div style="font-size: 12px; color: #666;">{{ comment.created_at }}</div>
+    </div>
+{% else %}
+    <p>Комментариев пока нет.</p>
+{% endfor %}
