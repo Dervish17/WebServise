@@ -1,0 +1,259 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+.topbar {
+    background: #1f2937;
+    color: white;
+    padding: 16px 24px;
+}
+
+.topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.topbar-title {
+    margin: 0;
+    font-size: 24px;
+}
+
+.topbar-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.page {
+    max-width: 1200px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+
+.page-title {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.filter-bar {
+    margin-bottom: 16px;
+}
+
+.filter-label {
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.select {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: white;
+}
+
+.layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.orders-table-wrap {
+    flex: 2;
+}
+
+.order-detail-wrap {
+    flex: 1;
+    min-width: 320px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    padding: 16px;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.orders-table th {
+    text-align: left;
+    padding: 10px 12px;
+}
+
+.orders-row {
+    cursor: pointer;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.orders-row td {
+    padding: 12px;
+}
+
+.orders-row td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.orders-row td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.empty-cell {
+    padding: 16px;
+    text-align: center;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+}
+
+.badge-new {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge-progress {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.badge-done {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.detail-title {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.detail-row {
+    margin: 8px 0;
+}
+
+.detail-actions {
+    margin: 12px 0 16px 0;
+}
+
+.form-block {
+    margin: 12px 0 16px 0;
+}
+
+.full-width {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.textarea {
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    resize: vertical;
+}
+
+.button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+}
+
+.button-blue {
+    background: #2563eb;
+}
+
+.button-green {
+    background: #16a34a;
+}
+
+.button-dark {
+    background: #374151;
+}
+
+.muted {
+    color: #6b7280;
+}
+
+.separator {
+    margin: 20px 0;
+    border: none;
+    border-top: 1px solid #e5e7eb;
+}
+
+.card {
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: white;
+}
+
+.card-soft {
+    background: #f9fafb;
+}
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.card-time {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 6px;
+}
+.mt-8 {
+    margin-top: 8px;
+}
+.orders-row:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.10);
+    transition: 0.15s ease;
+}
+.orders-row.active td {
+    background: #eff6ff;
+}
+
+.orders-row.active td:first-child {
+    box-shadow:
+        inset 2px 0 0 #2563eb,
+        inset 0 2px 0 #2563eb,
+        inset 0 -2px 0 #2563eb;
+}
+
+.orders-row.active td:not(:first-child):not(:last-child) {
+    box-shadow:
+        inset 0 2px 0 #2563eb,
+        inset 0 -2px 0 #2563eb;
+}
+
+.orders-row.active td:last-child {
+    box-shadow:
+        inset -2px 0 0 #2563eb,
+        inset 0 2px 0 #2563eb,
+        inset 0 -2px 0 #2563eb;
+}
+
+.button:hover {
+    opacity: 0.92;
+}
+
+.select:focus,
+.textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}

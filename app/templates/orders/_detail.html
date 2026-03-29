@@ -1,12 +1,25 @@
-<h3>Заявка #{{ order.id }}</h3>
+<h3 class="detail-title">Заявка #{{ order.id }}</h3>
 
-<p><strong>Название:</strong> {{ order.title }}</p>
-<p><strong>Описание:</strong> {{ order.description }}</p>
-<p><strong>Статус:</strong> {{ order.status }}</p>
+<p class="detail-row"><strong>Название:</strong> {{ order.title }}</p>
+<p class="detail-row"><strong>Описание:</strong> {{ order.description }}</p>
 
-<div style="margin-bottom: 12px;">
+<p class="detail-row">
+    <strong>Статус:</strong>
+    {% if order.status == "new" %}
+        <span class="badge badge-new">Новая</span>
+    {% elif order.status == "in_progress" %}
+        <span class="badge badge-progress">В работе</span>
+    {% elif order.status == "done" %}
+        <span class="badge badge-done">Выполнена</span>
+    {% else %}
+        <span>{{ order.status }}</span>
+    {% endif %}
+</p>
+
+<div class="detail-actions">
     {% if order.status == "new" %}
         <button
+            class="button button-blue"
             hx-post="/app/orders/{{ order.id }}/status"
             hx-vals='{"new_status":"in_progress"}'
             hx-target="#order-detail"
@@ -15,6 +28,7 @@
         </button>
     {% elif order.status == "in_progress" %}
         <button
+            class="button button-green"
             hx-post="/app/orders/{{ order.id }}/status"
             hx-vals='{"new_status":"done"}'
             hx-target="#order-detail"
@@ -22,19 +36,21 @@
             Завершить
         </button>
     {% elif order.status == "done" %}
-        <span>Заявка завершена</span>
+        <span class="muted">Заявка завершена</span>
     {% endif %}
 </div>
-<p><strong>Клиент:</strong> {{ order.client.name if order.client else "-" }}</p>
-<p><strong>Оборудование:</strong> {{ order.equipment.name if order.equipment else "-" }}</p>
-<p><strong>Создал:</strong> {{ order.creator.email if order.creator else "-" }}</p>
-<p><strong>Исполнитель:</strong> {{ order.assignee.email if order.assignee else "-" }}</p>
+
+<p class="detail-row"><strong>Клиент:</strong> {{ order.client.name if order.client else "-" }}</p>
+<p class="detail-row"><strong>Оборудование:</strong> {{ order.equipment.name if order.equipment else "-" }}</p>
+<p class="detail-row"><strong>Создал:</strong> {{ order.creator.email if order.creator else "-" }}</p>
+<p class="detail-row"><strong>Исполнитель:</strong> {{ order.assignee.email if order.assignee else "-" }}</p>
+
 <form
     hx-post="/app/orders/{{ order.id }}/assign"
     hx-target="#order-detail"
     hx-swap="innerHTML"
-    style="margin-bottom: 12px;">
-    <select name="user_id" style="width: 50%; min-width: 220px; margin-bottom: 8px;">
+    class="form-block">
+    <select name="user_id" class="select full-width">
         {% for engineer in engineers %}
             <option value="{{ engineer.id }}"
                 {% if order.assigned_to == engineer.id %}selected{% endif %}>
@@ -42,11 +58,14 @@
             </option>
         {% endfor %}
     </select>
-    <button type="submit">Назначить инженера</button>
+    <div class="mt-8">
+        <button type="submit" class="button button-dark">Назначить инженера</button>
+    </div>
 </form>
-<p><strong>Стоимость:</strong> {{ order.total_cost if order.total_cost is not none else "-" }}</p>
 
-<hr>
+<p class="detail-row"><strong>Стоимость:</strong> {{ order.total_cost if order.total_cost is not none else "-" }}</p>
+
+<hr class="separator">
 
 <h4>Добавить комментарий</h4>
 
@@ -54,21 +73,52 @@
     hx-post="/app/orders/{{ order.id }}/comment"
     hx-target="#order-detail"
     hx-swap="innerHTML">
-    <textarea name="text" rows="4" style="width: 100%;"></textarea>
-    <br>
-    <button type="submit">Добавить</button>
+    <textarea
+        name="text"
+        rows="4"
+        class="textarea full-width"></textarea>
+    <div class="mt-8">
+        <button type="submit" class="button button-blue">Добавить</button>
+    </div>
 </form>
 
-<hr>
+<hr class="separator">
 
 <h4>Комментарии</h4>
 
 {% for comment in comments %}
-    <div style="margin-bottom: 12px; padding: 8px; border: 1px solid #ddd;">
-        <div><strong>{{ comment.user_id }}</strong></div>
+    <div class="card card-soft">
         <div>{{ comment.description }}</div>
-        <div style="font-size: 12px; color: #666;">{{ comment.created_at }}</div>
+        <div class="card-time">
+            {{ comment.created_at.strftime("%d.%m.%Y %H:%M") if comment.created_at else "-" }}
+        </div>
     </div>
 {% else %}
-    <p>Комментариев пока нет.</p>
+    <p class="muted">Комментариев пока нет.</p>
+{% endfor %}
+
+<hr class="separator">
+
+<h4>История действий</h4>
+
+{% for log in logs %}
+    <div class="card">
+        <div class="card-title">
+            {% if log.action == "create" %}
+                Создание заявки
+            {% elif log.action == "assign" %}
+                Назначение инженера
+            {% elif log.action == "status_change" %}
+                Смена статуса
+            {% else %}
+                {{ log.action }}
+            {% endif %}
+        </div>
+        <div>{{ log.description }}</div>
+        <div class="card-time">
+            {{ log.created_at.strftime("%d.%m.%Y %H:%M") if log.created_at else "-" }}
+        </div>
+    </div>
+{% else %}
+    <p class="muted">История пока пуста.</p>
 {% endfor %}

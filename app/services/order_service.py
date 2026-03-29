@@ -62,11 +62,16 @@ def create_order(
     db.commit()
     db.refresh(order)
 
+    description = "Создана заявка"
+
+    if order.total_cost is not None:
+        description += f", стоимость: {order.total_cost}"
+
     _create_order_log(
         db=db,
         order_id=order.id,
         action="create",
-        description="Создана заявка",
+        description=description,
         user_id=current_user.id,
     )
     db.commit()
@@ -168,7 +173,7 @@ def assign_order(
         db=db,
         order_id=order.id,
         action="assign",
-        description=f"Назначен инженер id={user.id}",
+        description=f"Назначен инженер: {user.email}",
         user_id=current_user.id,
     )
 
@@ -202,11 +207,21 @@ def change_status(
     old_status = order.status
     order.status = new_status.value
 
+    status_names = {
+        "new": "Новая",
+        "in_progress": "В работе",
+        "done": "Выполнена",
+    }
+
     _create_order_log(
         db=db,
         order_id=order.id,
         action="status_change",
-        description=f"{old_status} -> {new_status.value}",
+        description=(
+            f"Статус изменён: "
+            f"{status_names.get(old_status, old_status)} → "
+            f"{status_names.get(new_status.value, new_status.value)}"
+        ),
         user_id=current_user.id,
     )
 

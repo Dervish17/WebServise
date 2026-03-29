@@ -151,6 +151,16 @@ def render_order_detail(request: Request, db: Session, order_id: int):
         .all()
     )
 
+    logs = (
+        db.query(OrderLog)
+        .filter(
+            OrderLog.order_id == order_id,
+            OrderLog.action != "comment",
+        )
+        .order_by(OrderLog.created_at.desc())
+        .all()
+    )
+
     engineers = (
         db.query(User)
         .filter(User.role == "engineer")
@@ -164,6 +174,7 @@ def render_order_detail(request: Request, db: Session, order_id: int):
         {
             "order": order,
             "comments": comments,
+            "logs": logs,
             "engineers": engineers,
         },
     )

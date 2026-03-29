@@ -1,4 +1,4 @@
-<table>
+<table class="orders-table">
     <thead>
         <tr>
             <th>ID</th>
@@ -13,22 +13,52 @@
     <tbody>
     {% for order in orders %}
         <tr
-            style="cursor: pointer;"
+            class="orders-row{% if loop.first %} active{% endif %}"
             hx-get="/app/orders/{{ order.id }}/detail"
             hx-target="#order-detail"
-            hx-swap="innerHTML">
+            hx-swap="innerHTML"
+            onclick="
+                document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
+                this.classList.add('active');
+            ">
+
             <td>{{ order.id }}</td>
+
             <td>{{ order.title }}</td>
-            <td>{{ order.status }}</td>
+
+            <td>
+                {% if order.status == "new" %}
+                    <span class="badge badge-new">Новая</span>
+                {% elif order.status == "in_progress" %}
+                    <span class="badge badge-progress">В работе</span>
+                {% elif order.status == "done" %}
+                    <span class="badge badge-done">Выполнена</span>
+                {% else %}
+                    <span>{{ order.status }}</span>
+                {% endif %}
+            </td>
+
             <td>{{ order.client.name if order.client else "-" }}</td>
+
             <td>{{ order.equipment.name if order.equipment else "-" }}</td>
+
             <td>{{ order.assignee.email if order.assignee else "-" }}</td>
+
             <td>{{ order.total_cost if order.total_cost is not none else "-" }}</td>
         </tr>
     {% else %}
         <tr>
-            <td colspan="7">Заявок нет</td>
+            <td colspan="7" class="empty-cell">Заявок нет</td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
+{% if orders %}
+    <div
+        hx-get="/app/orders/{{ orders[0].id }}/detail"
+        hx-trigger="load"
+        hx-target="#order-detail"
+        hx-swap="innerHTML"
+        style="display: none;">
+    </div>
+{% endif %}

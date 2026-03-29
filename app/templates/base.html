@@ -5,17 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Профсервис{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@2.0.7"></script>
+    <link rel="stylesheet" href="/static/css/app.css">
 </head>
 <body>
-    <header>
-        <h1>Профсервис</h1>
-        <nav>
-            <a href="/app/orders">Заявки</a>
-        </nav>
+
+    <header class="topbar">
+        <div class="topbar-inner">
+            <h1 class="topbar-title">Профсервис</h1>
+            <nav>
+                <a href="/app/orders" class="topbar-link">Заявки</a>
+            </nav>
+        </div>
     </header>
 
-    <main>
+    <main class="page">
         {% block content %}{% endblock %}
     </main>
+
 </body>
 </html>

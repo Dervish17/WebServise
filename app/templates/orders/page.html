@@ -3,30 +3,35 @@
 {% block title %}Заявки{% endblock %}
 
 {% block content %}
-<h2>Список заявок</h2>
+<h2 class="page-title">Список заявок</h2>
 
-<label for="status">Статус:</label>
-<select
-    id="status"
-    name="status"
-    hx-get="/app/orders/table"
-    hx-target="#orders-table"
-    hx-swap="innerHTML">
-    <option value="">Все</option>
-    <option value="new">Новая</option>
-    <option value="in_progress">В работе</option>
-    <option value="done">Выполнена</option>
-</select>
+<div class="filter-bar">
+    <label for="status" class="filter-label">Статус:</label>
+    <select
+        id="status"
+        name="status"
+        class="select"
+        hx-get="/app/orders/table"
+        hx-target="#orders-table"
+        hx-swap="innerHTML">
+        <option value="">Все</option>
+        <option value="new">Новая</option>
+        <option value="in_progress">В работе</option>
+        <option value="done">Выполнена</option>
+    </select>
+</div>
 
-<div style="display: flex; gap: 24px; align-items: flex-start; margin-top: 16px;">
-    <div id="orders-table" style="flex: 2;"
-         hx-get="/app/orders/table"
-         hx-trigger="load, refreshOrders from:body"
-         hx-swap="innerHTML">
+<div class="layout">
+    <div
+        id="orders-table"
+        class="orders-table-wrap"
+        hx-get="/app/orders/table"
+        hx-trigger="load, refreshOrders from:body"
+        hx-swap="innerHTML">
         Загрузка...
     </div>
 
-    <div id="order-detail" style="flex: 1; border: 1px solid #ccc; padding: 12px;">
+    <div id="order-detail" class="order-detail-wrap">
         Выбери заявку
     </div>
 </div>
