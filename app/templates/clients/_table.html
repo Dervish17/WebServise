@@ -1,0 +1,44 @@
+<table class="orders-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Контактное лицо</th>
+            <th>Телефон</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for client in clients %}
+        <tr
+            class="orders-row{% if loop.first %} active{% endif %}"
+            hx-get="/app/clients/{{ client.id }}/detail"
+            hx-target="#client-detail"
+            hx-swap="innerHTML"
+            onclick="
+                document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
+                this.classList.add('active');
+            ">
+            <td>{{ client.id }}</td>
+            <td>{{ client.name }}</td>
+            <td>{{ client.contact_person or "-" }}</td>
+            <td>{{ client.phone or "-" }}</td>
+            <td>{{ client.email or "-" }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="5" class="empty-cell">Клиентов нет</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if clients %}
+    <div
+        hx-get="/app/clients/{{ clients[0].id }}/detail"
+        hx-trigger="load"
+        hx-target="#client-detail"
+        hx-swap="innerHTML"
+        style="display: none;">
+    </div>
+{% endif %}

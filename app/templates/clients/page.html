@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Клиенты{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Клиенты</h2>
+
+<form
+    hx-post="/app/clients/create"
+    hx-target="#clients-table"
+    hx-swap="innerHTML"
+    style="margin-bottom: 20px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <input class="select" type="text" name="name" placeholder="Название клиента" required>
+        <input class="select" type="text" name="contact_person" placeholder="Контактное лицо">
+        <input class="select" type="text" name="phone" placeholder="Телефон">
+        <input class="select" type="email" name="email" placeholder="Email">
+    </div>
+
+    <div class="mt-8">
+        <textarea class="textarea full-width" name="address" rows="2" placeholder="Адрес"></textarea>
+    </div>
+
+    <div class="mt-8">
+        <textarea class="textarea full-width" name="notes" rows="2" placeholder="Заметки"></textarea>
+    </div>
+
+    <div class="mt-8">
+        <button type="submit" class="button button-blue">Добавить клиента</button>
+    </div>
+</form>
+
+<div class="layout">
+    <div
+        id="clients-table"
+        class="orders-table-wrap"
+        hx-get="/app/clients/table"
+        hx-trigger="load, refreshClients from:body"
+        hx-swap="innerHTML">
+        Загрузка...
+    </div>
+
+    <div id="client-detail" class="order-detail-wrap">
+        Выбери клиента
+    </div>
+</div>
+{% endblock %}

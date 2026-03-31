@@ -1,0 +1,73 @@
+<h3 class="detail-title">Клиент #{{ client.id }}</h3>
+
+<p class="detail-row"><strong>Название:</strong> {{ client.name }}</p>
+<p class="detail-row"><strong>Контактное лицо:</strong> {{ client.contact_person or "-" }}</p>
+<p class="detail-row"><strong>Телефон:</strong> {{ client.phone or "-" }}</p>
+<p class="detail-row"><strong>Email:</strong> {{ client.email or "-" }}</p>
+<p class="detail-row"><strong>Адрес:</strong> {{ client.address or "-" }}</p>
+<p class="detail-row"><strong>Заметки:</strong> {{ client.notes or "-" }}</p>
+
+<hr class="separator">
+
+<h4>Добавить оборудование</h4>
+
+<form
+    hx-post="/app/clients/{{ client.id }}/equipment/create"
+    hx-target="#client-detail"
+    hx-swap="innerHTML">
+    <input class="select full-width" type="text" name="name" placeholder="Название оборудования" required>
+
+    <div class="mt-8">
+        <input class="select full-width" type="text" name="model" placeholder="Модель">
+    </div>
+
+    <div class="mt-8">
+        <input class="select full-width" type="text" name="serial_number" placeholder="Серийный номер">
+    </div>
+
+    <div class="mt-8">
+        <input class="select full-width" type="text" name="manufacturer" placeholder="Производитель">
+    </div>
+
+    <div class="mt-8">
+        <button type="submit" class="button button-blue">Добавить оборудование</button>
+    </div>
+</form>
+<h4>Оборудование клиента</h4>
+
+{% for equipment in equipments %}
+    <div class="card card-soft">
+        <div class="card-title">{{ equipment.name or "Без названия" }}</div>
+        <div>Модель: {{ equipment.model or "-" }}</div>
+        <div>Серийный номер: {{ equipment.serial_number or "-" }}</div>
+        <div>Производитель: {{ equipment.manufacturer or "-" }}</div>
+    </div>
+{% else %}
+    <p class="muted">У клиента пока нет оборудования.</p>
+{% endfor %}
+
+<hr class="separator">
+
+<h4>Последние заявки клиента</h4>
+
+{% for order in orders %}
+    <div class="card card-soft">
+        <div class="card-title">Заявка #{{ order.id }} — {{ order.title }}</div>
+        <div>
+            Статус:
+            {% if order.status == "new" %}
+                <span class="badge badge-new">Новая</span>
+            {% elif order.status == "in_progress" %}
+                <span class="badge badge-progress">В работе</span>
+            {% elif order.status == "done" %}
+                <span class="badge badge-done">Выполнена</span>
+            {% else %}
+                {{ order.status }}
+            {% endif %}
+        </div>
+        <div>Оборудование: {{ order.equipment.name if order.equipment else "-" }}</div>
+        <div>Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
+    </div>
+{% else %}
+    <p class="muted">У клиента пока нет заявок.</p>
+{% endfor %}

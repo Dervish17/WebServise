@@ -1,0 +1,46 @@
+<table class="orders-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Модель</th>
+            <th>Серийный номер</th>
+            <th>Производитель</th>
+            <th>Клиент</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for equipment in equipments %}
+        <tr
+            class="orders-row{% if loop.first %} active{% endif %}"
+            hx-get="/app/equipment/{{ equipment.id }}/detail"
+            hx-target="#equipment-detail"
+            hx-swap="innerHTML"
+            onclick="
+                document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
+                this.classList.add('active');
+            ">
+            <td>{{ equipment.id }}</td>
+            <td>{{ equipment.name or "-" }}</td>
+            <td>{{ equipment.model or "-" }}</td>
+            <td>{{ equipment.serial_number or "-" }}</td>
+            <td>{{ equipment.manufacturer or "-" }}</td>
+            <td>{{ equipment.client.name if equipment.client else "-" }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="6" class="empty-cell">Оборудования нет</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% if equipments %}
+    <div
+        hx-get="/app/equipment/{{ equipments[0].id }}/detail"
+        hx-trigger="load"
+        hx-target="#equipment-detail"
+        hx-swap="innerHTML"
+        style="display: none;">
+    </div>
+{% endif %}

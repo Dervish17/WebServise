@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Оборудование{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Оборудование</h2>
+
+<div class="layout">
+    <div
+        id="equipment-table"
+        class="orders-table-wrap"
+        hx-get="/app/equipment/table"
+        hx-trigger="load"
+        hx-swap="innerHTML">
+        Загрузка...
+    </div>
+
+    <div id="equipment-detail" class="order-detail-wrap">
+        Выбери оборудование
+    </div>
+</div>
+{% endblock %}

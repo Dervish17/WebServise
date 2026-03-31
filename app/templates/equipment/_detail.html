@@ -1,0 +1,32 @@
+<h3 class="detail-title">Оборудование #{{ equipment.id }}</h3>
+
+<p class="detail-row"><strong>Название:</strong> {{ equipment.name or "-" }}</p>
+<p class="detail-row"><strong>Модель:</strong> {{ equipment.model or "-" }}</p>
+<p class="detail-row"><strong>Серийный номер:</strong> {{ equipment.serial_number or "-" }}</p>
+<p class="detail-row"><strong>Производитель:</strong> {{ equipment.manufacturer or "-" }}</p>
+<p class="detail-row"><strong>Клиент:</strong> {{ equipment.client.name if equipment.client else "-" }}</p>
+
+<hr class="separator">
+
+<h4>Заявки по этому оборудованию</h4>
+
+{% for order in orders %}
+    <div class="card card-soft">
+        <div class="card-title">Заявка #{{ order.id }} — {{ order.title }}</div>
+        <div>
+            Статус:
+            {% if order.status == "new" %}
+                <span class="badge badge-new">Новая</span>
+            {% elif order.status == "in_progress" %}
+                <span class="badge badge-progress">В работе</span>
+            {% elif order.status == "done" %}
+                <span class="badge badge-done">Выполнена</span>
+            {% else %}
+                {{ order.status }}
+            {% endif %}
+        </div>
+        <div>Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
+    </div>
+{% else %}
+    <p class="muted">По этому оборудованию заявок пока нет.</p>
+{% endfor %}
