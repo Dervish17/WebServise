@@ -1,0 +1,39 @@
+<h3 class="detail-title">Редактирование оборудования #{{ equipment.id }}</h3>
+
+<form
+    hx-post="/app/equipment/{{ equipment.id }}/edit"
+    hx-target="#equipment-detail"
+    hx-swap="innerHTML">
+
+    <div class="detail-row">
+        <label><strong>Название</strong></label>
+        <input class="select full-width" type="text" name="name" value="{{ equipment.name or '' }}" required>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Модель</strong></label>
+        <input class="select full-width" type="text" name="model" value="{{ equipment.model or '' }}">
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Серийный номер</strong></label>
+        <input class="select full-width" type="text" name="serial_number" value="{{ equipment.serial_number or '' }}">
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Производитель</strong></label>
+        <input class="select full-width" type="text" name="manufacturer" value="{{ equipment.manufacturer or '' }}">
+    </div>
+
+    <div class="detail-actions">
+        <button type="submit" class="button button-blue">Сохранить</button>
+        <button
+            type="button"
+            class="button button-dark"
+            hx-get="/app/equipment/{{ equipment.id }}/detail"
+            hx-target="#equipment-detail"
+            hx-swap="innerHTML">
+            Отмена
+        </button>
+    </div>
+</form>

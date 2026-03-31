@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div style="max-width: 420px; margin: 40px auto;">
+    <div class="order-detail-wrap">
+        <h2 class="page-title">Вход в систему</h2>
+
+        <form method="post" action="/app/login">
+            <div class="detail-row">
+                <label><strong>Email</strong></label>
+                <input class="select full-width" type="email" name="email" required>
+            </div>
+
+            <div class="detail-row">
+                <label><strong>Пароль</strong></label>
+                <input class="select full-width" type="password" name="password" required>
+            </div>
+
+            <div class="detail-actions">
+                <button type="submit" class="button button-blue">Войти</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

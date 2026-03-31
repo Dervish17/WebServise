@@ -1,5 +1,22 @@
 <h3 class="detail-title">Заявка #{{ order.id }}</h3>
-
+<div class="detail-actions">
+    <button
+        class="button button-dark"
+        hx-get="/app/orders/{{ order.id }}/edit"
+        hx-target="#order-detail"
+        hx-swap="innerHTML">
+        Редактировать
+    </button>
+    <button
+        class="button"
+        style="background: #dc2626;"
+        hx-delete="/app/orders/{{ order.id }}"
+        hx-confirm="Удалить заявку?"
+        hx-target="#order-detail"
+        hx-swap="innerHTML">
+        Удалить
+    </button>
+</div>
 <p class="detail-row"><strong>Название:</strong> {{ order.title }}</p>
 <p class="detail-row"><strong>Описание:</strong> {{ order.description }}</p>
 
@@ -40,8 +57,30 @@
     {% endif %}
 </div>
 
-<p class="detail-row"><strong>Клиент:</strong> {{ order.client.name if order.client else "-" }}</p>
-<p class="detail-row"><strong>Оборудование:</strong> {{ order.equipment.name if order.equipment else "-" }}</p>
+<p class="detail-row">
+    <strong>Клиент:</strong>
+    {% if order.client %}
+        <a
+            href="/app/clients/{{ order.client.id }}/page"
+            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            {{ order.client.name }}
+        </a>
+    {% else %}
+        -
+    {% endif %}
+</p>
+<p class="detail-row">
+    <strong>Оборудование:</strong>
+    {% if order.equipment %}
+        <a
+            href="/app/equipment/{{ order.equipment.id }}/page"
+            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            {{ order.equipment.name }}
+        </a>
+    {% else %}
+        -
+    {% endif %}
+</p>
 <p class="detail-row"><strong>Создал:</strong> {{ order.creator.email if order.creator else "-" }}</p>
 <p class="detail-row"><strong>Исполнитель:</strong> {{ order.assignee.email if order.assignee else "-" }}</p>
 

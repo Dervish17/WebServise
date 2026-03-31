@@ -1,35 +1,91 @@
-from fastapi import APIRouter, Depends, Request, Form, HTTPException, status
+from fastapi import APIRouter, Depends, Request, Form, HTTPException, status, Cookie
 from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse, RedirectResponse
+from jose import jwt, JWTError
 from sqlalchemy.orm import Session, joinedload
+
+from app.core.config import SECRET_KEY, ALGORITHM
 from app.core.enums import OrderStatus
 from app.db.session import get_db
-from app.services.order_service import filter_orders, get_order_by_id, add_comment, change_status, assign_order
+from app.services.order_service import filter_orders, get_order_by_id, add_comment, change_status, assign_order, \
+    update_order, delete_order, create_order
 from app.models.order_log import OrderLog
 from app.models.user import User
 from app.models.order import Order
 from app.models.equipment import Equipment
-from app.services.equipment_service import create_equipment, get_equipment_by_id, get_all_equipment
-from app.services.client_service import get_all_clients, get_client_by_id, create_client
+from app.services.equipment_service import create_equipment, get_equipment_by_id, update_equipment, delete_equipment, \
+    get_all_equipment
+from app.services.auth_service import login_user
+from app.services.client_service import get_all_clients, get_client_by_id, create_client, update_client, delete_client
 from app.core.dependencies import get_current_user
 
 router = APIRouter(tags=["ui"])
 templates = Jinja2Templates(directory="app/templates")
 
+def get_current_ui_user(
+    ui_user_email: str | None = Cookie(default=None),
+    db: Session = Depends(get_db),
+) -> User:
+    if not ui_user_email:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
+    user = db.query(User).filter(User.email == ui_user_email).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    return user
+
+def get_user_from_token_value(token: str | None, db: Session) -> User | None:
+    if not token:
+        return None
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+    except JWTError:
+        return None
+
+    if not email:
+        return None
+
+    user = db.query(User).filter(User.email == email).first()
+    return user
+
+@router.get("/app")
+def app_root():
+    return RedirectResponse(url="/app/login", status_code=303)
 
 @router.get("/app/orders")
-def orders_page(request: Request):
+def orders_page(
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    equipments = (
+        db.query(Equipment)
+        .options(joinedload(Equipment.client))
+        .order_by(Equipment.id.desc())
+        .all()
+    )
+
     return templates.TemplateResponse(
         request,
         "orders/page.html",
-        {},
+        {"equipments": equipments},
     )
 
 
 @router.get("/app/orders/table")
 def orders_table(
-    request: Request,
-    status: str | None = None,
-    db: Session = Depends(get_db),
+        request: Request,
+        status: str | None = None,
+        db: Session = Depends(get_db),
 ):
     orders = filter_orders(
         db=db,
@@ -44,13 +100,15 @@ def orders_table(
         {"orders": orders},
     )
 
+
 @router.get("/app/orders/{order_id}/detail")
 def order_detail(
-    order_id: int,
-    request: Request,
-    db: Session = Depends(get_db),
+        order_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
 ):
     return render_order_detail(request, db, order_id)
+
 
 @router.post("/app/orders/{order_id}/comment")
 def add_comment_ui(
@@ -58,8 +116,8 @@ def add_comment_ui(
     request: Request,
     text: str = Form(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
 ):
-    current_user = get_ui_user(db)
 
     add_comment(
         db=db,
@@ -69,6 +127,7 @@ def add_comment_ui(
     )
 
     return render_order_detail(request, db, order_id)
+
 
 def get_ui_user(db: Session) -> User:
     user = db.query(User).order_by(User.id.asc()).first()
@@ -81,14 +140,15 @@ def get_ui_user(db: Session) -> User:
 
     return user
 
+
 @router.post("/app/orders/{order_id}/status")
 def change_status_ui(
     order_id: int,
     request: Request,
     new_status: str = Form(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
 ):
-    current_user = get_ui_user(db)
 
     change_status(
         db=db,
@@ -97,11 +157,10 @@ def change_status_ui(
         current_user=current_user,
     )
 
-
-
     response = render_order_detail(request, db, order_id)
     response.headers["HX-Trigger"] = "refreshOrders"
     return response
+
 
 @router.post("/app/orders/{order_id}/assign")
 def assign_order_ui(
@@ -109,8 +168,8 @@ def assign_order_ui(
     request: Request,
     user_id: int = Form(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
 ):
-    current_user = get_ui_user(db)
 
     assign_order(
         db=db,
@@ -122,6 +181,7 @@ def assign_order_ui(
     response = render_order_detail(request, db, order_id)
     response.headers["HX-Trigger"] = "refreshOrders"
     return response
+
 
 def render_order_detail(request: Request, db: Session, order_id: int):
     order = get_order_by_id(db, order_id)
@@ -164,6 +224,7 @@ def render_order_detail(request: Request, db: Session, order_id: int):
         },
     )
 
+
 @router.get("/app/clients")
 def clients_page(request: Request):
     return templates.TemplateResponse(
@@ -175,8 +236,8 @@ def clients_page(request: Request):
 
 @router.get("/app/clients/table")
 def clients_table(
-    request: Request,
-    db: Session = Depends(get_db),
+        request: Request,
+        db: Session = Depends(get_db),
 ):
     clients = get_all_clients(db)
 
@@ -186,11 +247,12 @@ def clients_table(
         {"clients": clients},
     )
 
+
 @router.get("/app/clients/{client_id}/detail")
 def client_detail(
-    client_id: int,
-    request: Request,
-    db: Session = Depends(get_db),
+        client_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
 ):
     client = get_client_by_id(db, client_id)
 
@@ -220,16 +282,17 @@ def client_detail(
         },
     )
 
+
 @router.post("/app/clients/create")
 def create_client_ui(
-    request: Request,
-    name: str = Form(...),
-    contact_person: str = Form(None),
-    phone: str = Form(None),
-    email: str = Form(None),
-    address: str = Form(None),
-    notes: str = Form(None),
-    db: Session = Depends(get_db),
+        request: Request,
+        name: str = Form(...),
+        contact_person: str = Form(None),
+        phone: str = Form(None),
+        email: str = Form(None),
+        address: str = Form(None),
+        notes: str = Form(None),
+        db: Session = Depends(get_db),
 ):
     create_client(
         db=db,
@@ -251,15 +314,16 @@ def create_client_ui(
     response.headers["HX-Trigger"] = "refreshClients"
     return response
 
+
 @router.post("/app/clients/{client_id}/equipment/create")
 def create_equipment_ui(
-    client_id: int,
-    request: Request,
-    name: str = Form(...),
-    model: str = Form(None),
-    serial_number: str = Form(None),
-    manufacturer: str = Form(None),
-    db: Session = Depends(get_db),
+        client_id: int,
+        request: Request,
+        name: str = Form(...),
+        model: str = Form(None),
+        serial_number: str = Form(None),
+        manufacturer: str = Form(None),
+        db: Session = Depends(get_db),
 ):
     create_equipment(
         db=db,
@@ -288,6 +352,7 @@ def create_equipment_ui(
         },
     )
 
+
 @router.get("/app/equipment")
 def equipment_page(request: Request):
     return templates.TemplateResponse(
@@ -299,8 +364,8 @@ def equipment_page(request: Request):
 
 @router.get("/app/equipment/table")
 def equipment_table(
-    request: Request,
-    db: Session = Depends(get_db),
+        request: Request,
+        db: Session = Depends(get_db),
 ):
     equipments = (
         db.query(Equipment)
@@ -315,11 +380,12 @@ def equipment_table(
         {"equipments": equipments},
     )
 
+
 @router.get("/app/equipment/{equipment_id}/detail")
 def equipment_detail(
-    equipment_id: int,
-    request: Request,
-    db: Session = Depends(get_db),
+        equipment_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
 ):
     equipment = get_equipment_by_id(db, equipment_id)
 
@@ -338,3 +404,382 @@ def equipment_detail(
             "orders": orders,
         },
     )
+
+
+@router.get("/app/orders/{order_id}/page")
+def order_page(
+        order_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    order = get_order_by_id(db, order_id)
+
+    comments = (
+        db.query(OrderLog)
+        .filter(
+            OrderLog.order_id == order_id,
+            OrderLog.action == "comment",
+        )
+        .order_by(OrderLog.created_at.desc())
+        .all()
+    )
+
+    logs = (
+        db.query(OrderLog)
+        .filter(
+            OrderLog.order_id == order_id,
+            OrderLog.action != "comment",
+        )
+        .order_by(OrderLog.created_at.desc())
+        .all()
+    )
+
+    engineers = (
+        db.query(User)
+        .filter(User.role == "engineer")
+        .order_by(User.email.asc())
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "orders/order_page.html",
+        {
+            "order": order,
+            "comments": comments,
+            "logs": logs,
+            "engineers": engineers,
+        },
+    )
+
+
+@router.get("/app/clients/{client_id}/page")
+def client_page(
+        client_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    client = get_client_by_id(db, client_id)
+
+    equipments = (
+        db.query(Equipment)
+        .filter(Equipment.client_id == client_id)
+        .order_by(Equipment.id.desc())
+        .all()
+    )
+
+    orders = (
+        db.query(Order)
+        .options(joinedload(Order.equipment))
+        .filter(Order.client_id == client_id)
+        .order_by(Order.created_at.desc())
+        .limit(10)
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "clients/client_page.html",
+        {
+            "client": client,
+            "equipments": equipments,
+            "orders": orders,
+        },
+    )
+
+
+@router.get("/app/equipment/{equipment_id}/page")
+def equipment_page_single(
+        equipment_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    equipment = get_equipment_by_id(db, equipment_id)
+
+    orders = (
+        db.query(Order)
+        .filter(Order.equipment_id == equipment_id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "equipment/equipment_page.html",
+        {
+            "equipment": equipment,
+            "orders": orders,
+        },
+    )
+
+
+@router.get("/app/clients/{client_id}/edit")
+def edit_client_form(
+        client_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    client = get_client_by_id(db, client_id)
+
+    return templates.TemplateResponse(
+        request,
+        "clients/_edit.html",
+        {"client": client},
+    )
+
+
+@router.post("/app/clients/{client_id}/edit")
+def edit_client_submit(
+        client_id: int,
+        request: Request,
+        name: str = Form(...),
+        contact_person: str = Form(None),
+        phone: str = Form(None),
+        email: str = Form(None),
+        address: str = Form(None),
+        notes: str = Form(None),
+        db: Session = Depends(get_db),
+):
+    update_client(
+        db=db,
+        client_id=client_id,
+        name=name,
+        contact_person=contact_person,
+        phone=phone,
+        email=email,
+        address=address,
+        notes=notes,
+    )
+
+    client = get_client_by_id(db, client_id)
+
+    equipments = (
+        db.query(Equipment)
+        .filter(Equipment.client_id == client_id)
+        .order_by(Equipment.id.desc())
+        .all()
+    )
+
+    orders = (
+        db.query(Order)
+        .options(joinedload(Order.equipment))
+        .filter(Order.client_id == client_id)
+        .order_by(Order.created_at.desc())
+        .limit(10)
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "clients/_detail.html",
+        {
+            "client": client,
+            "equipments": equipments,
+            "orders": orders,
+        },
+    )
+
+
+@router.get("/app/equipment/{equipment_id}/edit")
+def edit_equipment_form(
+        equipment_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    equipment = get_equipment_by_id(db, equipment_id)
+
+    return templates.TemplateResponse(
+        request,
+        "equipment/_edit.html",
+        {"equipment": equipment},
+    )
+
+
+@router.post("/app/equipment/{equipment_id}/edit")
+def edit_equipment_submit(
+        equipment_id: int,
+        request: Request,
+        name: str = Form(...),
+        model: str = Form(None),
+        serial_number: str = Form(None),
+        manufacturer: str = Form(None),
+        db: Session = Depends(get_db),
+):
+    update_equipment(
+        db=db,
+        equipment_id=equipment_id,
+        name=name,
+        model=model,
+        serial_number=serial_number,
+        manufacturer=manufacturer,
+    )
+
+    equipment = get_equipment_by_id(db, equipment_id)
+
+    orders = (
+        db.query(Order)
+        .filter(Order.equipment_id == equipment_id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "equipment/_detail.html",
+        {
+            "equipment": equipment,
+            "orders": orders,
+        },
+    )
+
+
+@router.get("/app/orders/{order_id}/edit")
+def edit_order_form(
+        order_id: int,
+        request: Request,
+        db: Session = Depends(get_db),
+):
+    order = get_order_by_id(db, order_id)
+
+    return templates.TemplateResponse(
+        request,
+        "orders/_edit.html",
+        {"order": order},
+    )
+
+
+@router.post("/app/orders/{order_id}/edit")
+def edit_order_submit(
+        order_id: int,
+        request: Request,
+        title: str = Form(...),
+        description: str = Form(None),
+        total_cost: float | None = Form(None),
+        db: Session = Depends(get_db),
+):
+    update_order(
+        db=db,
+        order_id=order_id,
+        title=title,
+        description=description,
+        total_cost=total_cost,
+    )
+
+    return render_order_detail(request, db, order_id)
+
+
+@router.delete("/app/orders/{order_id}")
+def delete_order_ui(
+        order_id: int,
+        db: Session = Depends(get_db),
+):
+    delete_order(db, order_id)
+
+    response = HTMLResponse('<p class="muted">Заявка удалена.</p>')
+    response.headers["HX-Trigger"] = "refreshOrders"
+    return response
+
+
+@router.post("/app/orders/create")
+def create_order_ui(
+    request: Request,
+    title: str = Form(...),
+    description: str = Form(None),
+    equipment_id: int = Form(...),
+    total_cost: float | None = Form(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
+):
+
+    order = create_order(
+        db=db,
+        title=title,
+        description=description,
+        equipment_id=equipment_id,
+        current_user=current_user,
+        total_cost=total_cost,
+    )
+
+    response = templates.TemplateResponse(
+        request,
+        "orders/_create_result.html",
+        {"order": order},
+    )
+    response.headers["HX-Trigger"] = "refreshOrders"
+    return response
+
+
+@router.delete("/app/clients/{client_id}")
+def delete_client_ui(
+        client_id: int,
+        db: Session = Depends(get_db),
+):
+    try:
+        delete_client(db, client_id)
+
+        response = HTMLResponse('<p class="muted">Клиент удалён.</p>')
+        response.headers["HX-Trigger"] = "refreshClients"
+        return response
+
+    except HTTPException as e:
+        return HTMLResponse(
+            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
+        )
+
+
+@router.delete("/app/equipment/{equipment_id}")
+def delete_equipment_ui(
+        equipment_id: int,
+        db: Session = Depends(get_db),
+):
+    try:
+        delete_equipment(db, equipment_id)
+
+        response = HTMLResponse('<p class="muted">Оборудование удалено.</p>')
+        response.headers["HX-Trigger"] = "refreshEquipment"
+        return response
+
+    except HTTPException as e:
+        return HTMLResponse(
+            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
+        )
+
+@router.get("/app/login")
+def login_page(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "auth/login.html",
+        {},
+    )
+
+@router.post("/app/login")
+def login_submit(
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    token = login_user(db, email, password)
+
+    response = RedirectResponse(url="/app/orders", status_code=303)
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        samesite="lax",
+        path="/",
+    )
+    response.set_cookie(
+        key="ui_user_email",
+        value=email,
+        httponly=True,
+        samesite="lax",
+        path="/",
+    )
+    return response
+
+@router.get("/app/logout")
+def logout():
+    response = RedirectResponse(url="/app/login", status_code=303)
+    response.delete_cookie("access_token", path="/")
+    response.delete_cookie("ui_user_email", path="/")
+    return response

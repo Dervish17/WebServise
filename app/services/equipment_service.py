@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.client import Client
 from app.models.equipment import Equipment
+from app.models.order import Order
 
 
 def create_equipment(
@@ -50,3 +51,41 @@ def get_equipment_by_id(db: Session, equipment_id: int) -> type[Equipment]:
         )
 
     return equipment
+
+def update_equipment(
+    db: Session,
+    equipment_id: int,
+    name: str,
+    model: str | None = None,
+    serial_number: str | None = None,
+    manufacturer: str | None = None,
+) -> Equipment:
+    equipment = get_equipment_by_id(db, equipment_id)
+
+    equipment.name = name
+    equipment.model = model
+    equipment.serial_number = serial_number
+    equipment.manufacturer = manufacturer
+
+    db.commit()
+    db.refresh(equipment)
+
+    return equipment
+
+def delete_equipment(db: Session, equipment_id: int) -> None:
+    equipment = get_equipment_by_id(db, equipment_id)
+
+    order_exists = (
+        db.query(Order)
+        .filter(Order.equipment_id == equipment_id)
+        .first()
+    )
+
+    if order_exists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить оборудование: по нему есть заявки",
+        )
+
+    db.delete(equipment)
+    db.commit()

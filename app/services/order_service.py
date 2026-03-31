@@ -6,6 +6,7 @@ from app.models.equipment import Equipment
 from app.models.order import Order
 from app.models.order_log import OrderLog
 from app.models.user import User
+from app.models.status_history import StatusHistory
 
 
 ALLOWED_TRANSITIONS = {
@@ -251,3 +252,30 @@ def add_comment(
     db.refresh(log)
 
     return log
+
+def update_order(
+    db: Session,
+    order_id: int,
+    title: str,
+    description: str | None = None,
+    total_cost=None,
+) -> Order:
+    order = get_order_by_id(db, order_id)
+
+    order.title = title
+    order.description = description
+    order.total_cost = total_cost
+
+    db.commit()
+    db.refresh(order)
+
+    return order
+
+def delete_order(db: Session, order_id: int) -> None:
+    order = get_order_by_id(db, order_id)
+
+    db.query(OrderLog).filter(OrderLog.order_id == order.id).delete()
+    db.query(StatusHistory).filter(StatusHistory.order_id == order.id).delete()
+
+    db.delete(order)
+    db.commit()

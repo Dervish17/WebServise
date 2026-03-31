@@ -1,4 +1,22 @@
 <h3 class="detail-title">Клиент #{{ client.id }}</h3>
+<div class="detail-actions">
+    <button
+        class="button button-dark"
+        hx-get="/app/clients/{{ client.id }}/edit"
+        hx-target="#client-detail"
+        hx-swap="innerHTML">
+        Редактировать
+    </button>
+    <button
+        class="button"
+        style="background: #dc2626;"
+        hx-delete="/app/clients/{{ client.id }}"
+        hx-confirm="Удалить клиента?"
+        hx-target="#client-detail"
+        hx-swap="innerHTML">
+        Удалить
+    </button>
+</div>
 
 <p class="detail-row"><strong>Название:</strong> {{ client.name }}</p>
 <p class="detail-row"><strong>Контактное лицо:</strong> {{ client.contact_person or "-" }}</p>
@@ -51,7 +69,10 @@
 <h4>Последние заявки клиента</h4>
 
 {% for order in orders %}
-    <div class="card card-soft">
+    <a
+        href="/app/orders/{{ order.id }}/page"
+        style="text-decoration: none; color: inherit; display: block;">
+        <div class="card card-soft" style="cursor: pointer;">
         <div class="card-title">Заявка #{{ order.id }} — {{ order.title }}</div>
         <div>
             Статус:
@@ -67,7 +88,8 @@
         </div>
         <div>Оборудование: {{ order.equipment.name if order.equipment else "-" }}</div>
         <div>Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
-    </div>
+        </div>
+    </a>
 {% else %}
     <p class="muted">У клиента пока нет заявок.</p>
 {% endfor %}

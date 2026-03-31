@@ -1,0 +1,34 @@
+<h3 class="detail-title">Редактирование заявки #{{ order.id }}</h3>
+
+<form
+    hx-post="/app/orders/{{ order.id }}/edit"
+    hx-target="#order-detail"
+    hx-swap="innerHTML">
+
+    <div class="detail-row">
+        <label><strong>Название</strong></label>
+        <input class="select full-width" type="text" name="title" value="{{ order.title }}" required>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Описание</strong></label>
+        <textarea class="textarea full-width" name="description" rows="4">{{ order.description or '' }}</textarea>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Стоимость</strong></label>
+        <input class="select full-width" type="number" step="0.01" name="total_cost" value="{{ order.total_cost if order.total_cost is not none else '' }}">
+    </div>
+
+    <div class="detail-actions">
+        <button type="submit" class="button button-blue">Сохранить</button>
+        <button
+            type="button"
+            class="button button-dark"
+            hx-get="/app/orders/{{ order.id }}/detail"
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            Отмена
+        </button>
+    </div>
+</form>

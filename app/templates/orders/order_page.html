@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Заявка #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 760px; margin: 0 auto;">
+
+    <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+        <a
+            href="/app/orders"
+            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            ← Назад к заявкам
+        </a>
+
+        <a
+            href="/app/clients"
+            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            ← К списку клиентов
+        </a>
+        <a
+            href="/app/clients/{{ order.client_id }}/page"
+            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            ← К клиенту
+        </a>
+    </div>
+
+    <div class="order-detail-wrap">
+        {% include "orders/_detail.html" %}
+    </div>
+</div>
+{% endblock %}

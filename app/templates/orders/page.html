@@ -5,6 +5,50 @@
 {% block content %}
 <h2 class="page-title">Список заявок</h2>
 
+<form
+    id="create-order-form"
+    hx-post="/app/orders/create"
+    hx-target="#create-order-result"
+    hx-swap="innerHTML"
+    hx-on::after-request="if(event.detail.successful) this.reset()"
+    class="card"
+    style="margin-bottom: 20px;">
+
+    <div class="detail-row">
+        <label><strong>Название заявки</strong></label>
+        <input class="select full-width" type="text" name="title" required>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Описание</strong></label>
+        <textarea class="textarea full-width" name="description" rows="3"></textarea>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Оборудование</strong></label>
+        <select class="select full-width" name="equipment_id" required>
+            <option value="">Выбери оборудование</option>
+            {% for equipment in equipments %}
+                <option value="{{ equipment.id }}">
+                    #{{ equipment.id }} — {{ equipment.name or "Без названия" }}
+                    {% if equipment.client %} ({{ equipment.client.name }}){% endif %}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Стоимость</strong></label>
+        <input class="select full-width" type="number" step="0.01" name="total_cost">
+    </div>
+
+    <div class="detail-actions">
+        <button type="submit" class="button button-blue">Создать заявку</button>
+    </div>
+
+    <div id="create-order-result"></div>
+</form>
+
 <div class="filter-bar">
     <label for="status" class="filter-label">Статус:</label>
     <select

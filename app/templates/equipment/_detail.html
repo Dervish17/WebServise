@@ -1,4 +1,22 @@
 <h3 class="detail-title">Оборудование #{{ equipment.id }}</h3>
+<div class="detail-actions">
+    <button
+        class="button button-dark"
+        hx-get="/app/equipment/{{ equipment.id }}/edit"
+        hx-target="#equipment-detail"
+        hx-swap="innerHTML">
+        Редактировать
+    </button>
+    <button
+        class="button"
+        style="background: #dc2626;"
+        hx-delete="/app/equipment/{{ equipment.id }}"
+        hx-confirm="Удалить оборудование?"
+        hx-target="#equipment-detail"
+        hx-swap="innerHTML">
+        Удалить
+    </button>
+</div>
 
 <p class="detail-row"><strong>Название:</strong> {{ equipment.name or "-" }}</p>
 <p class="detail-row"><strong>Модель:</strong> {{ equipment.model or "-" }}</p>
@@ -11,7 +29,10 @@
 <h4>Заявки по этому оборудованию</h4>
 
 {% for order in orders %}
-    <div class="card card-soft">
+    <a
+        href="/app/orders/{{ order.id }}/page"
+        style="text-decoration: none; color: inherit; display: block;">
+        <div class="card card-soft" style="cursor: pointer;">
         <div class="card-title">Заявка #{{ order.id }} — {{ order.title }}</div>
         <div>
             Статус:
@@ -27,6 +48,7 @@
         </div>
         <div>Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
     </div>
+    </a>
 {% else %}
     <p class="muted">По этому оборудованию заявок пока нет.</p>
 {% endfor %}
