@@ -1,0 +1,43 @@
+<div class="card">
+    <h3 class="detail-title">Редактирование пользователя #{{ user.id }}</h3>
+
+    <form
+        hx-post="/app/users/{{ user.id }}/edit"
+        hx-target="#user-edit-modal"
+        hx-swap="innerHTML"
+        hx-on::after-request="if(event.detail.successful) document.getElementById('user-edit-modal').innerHTML = ''">
+
+        <div class="detail-row">
+            <label><strong>Фамилия</strong></label>
+            <input class="select full-width" type="text" name="last_name" value="{{ user.last_name or '' }}">
+        </div>
+
+        <div class="detail-row">
+            <label><strong>Имя</strong></label>
+            <input class="select full-width" type="text" name="first_name" value="{{ user.first_name or '' }}">
+        </div>
+
+        <div class="detail-row">
+            <label><strong>Отчество</strong></label>
+            <input class="select full-width" type="text" name="middle_name" value="{{ user.middle_name or '' }}">
+        </div>
+
+        <div class="detail-row">
+            <label><strong>Email</strong></label>
+            <input class="select full-width" type="email" name="email" value="{{ user.email }}" required>
+        </div>
+
+        <div class="detail-row">
+            <label><strong>Роль</strong></label>
+            <select class="select full-width" name="role" required>
+                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Администратор</option>
+                <option value="manager" {% if user.role == "manager" %}selected{% endif %}>Менеджер</option>
+                <option value="engineer" {% if user.role == "engineer" %}selected{% endif %}>Инженер</option>
+            </select>
+        </div>
+
+        <div class="detail-actions">
+            <button type="submit" class="button button-blue">Сохранить</button>
+        </div>
+    </form>
+</div>

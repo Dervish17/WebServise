@@ -6,6 +6,9 @@ from pydantic import BaseModel, ConfigDict, EmailStr
 class UserCreate(BaseModel):
     email: EmailStr
     password: str
+    last_name: str | None
+    first_name: str | None
+    middle_name: str | None
     role: str
 
 
@@ -14,5 +17,9 @@ class UserResponse(BaseModel):
 
     id: int
     email: EmailStr
+    last_name: str | None
+    first_name: str | None
+    middle_name: str | None
     role: str
+    is_active: bool
     created_at: datetime

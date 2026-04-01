@@ -12,10 +12,18 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user_endpoint(
-    user: UserCreate,
-    db: Session = Depends(get_db),
+        user: UserCreate,
+        db: Session = Depends(get_db),
 ):
-    return create_user(db, user.email, user.password, user.role)
+    return create_user(
+        db=db,
+        email=user.email,
+        password=user.password,
+        role=user.role,
+        last_name=user.last_name,
+        first_name=user.first_name,
+        middle_name=user.middle_name,
+    )
 
 
 @router.get("/", response_model=list[UserResponse])

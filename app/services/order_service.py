@@ -162,6 +162,12 @@ def assign_order(
             detail="Selected user is not an engineer",
         )
 
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Selected engineer is inactive",
+        )
+
     if current_user.role not in ["admin", "manager"]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

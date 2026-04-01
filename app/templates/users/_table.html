@@ -1,0 +1,88 @@
+<table class="orders-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Фамилия</th>
+            <th>Имя</th>
+            <th>Отчество</th>
+            <th>Email</th>
+            <th>Роль</th>
+            <th>Статус</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr class="orders-row{% if not user.is_active %} user-inactive{% endif %}">
+            <td>{{ user.id }}</td>
+            <td>{{ user.last_name or "-" }}</td>
+            <td>{{ user.first_name or "-" }}</td>
+            <td>{{ user.middle_name or "-" }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+                {% if user.role == "admin" %}
+                    Администратор
+                {% elif user.role == "manager" %}
+                    Менеджер
+                {% elif user.role == "engineer" %}
+                    Инженер
+                {% else %}
+                    {{ user.role }}
+                {% endif %}
+            </td>
+            <td>
+                {% if user.is_active %}
+                    <span class="badge badge-done">Активен</span>
+                {% else %}
+                    <span class="badge" style="background: #fee2e2; color: #b91c1c;">Неактивен</span>
+                {% endif %}
+            </td>
+            <td>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button
+                        class="button button-dark"
+                        hx-get="/app/users/{{ user.id }}/edit"
+                        hx-target="#user-edit-modal"
+                        hx-swap="innerHTML">
+                        Редактировать
+                    </button>
+
+                    {% if user.is_active %}
+                        <button
+                            class="button"
+                            style="background: #b45309;"
+                            hx-post="/app/users/{{ user.id }}/toggle-active"
+                            hx-target="#user-edit-modal"
+                            hx-swap="innerHTML">
+                            Деактивировать
+                        </button>
+                    {% else %}
+                        <button
+                            class="button"
+                            style="background: #15803d;"
+                            hx-post="/app/users/{{ user.id }}/toggle-active"
+                            hx-target="#user-edit-modal"
+                            hx-swap="innerHTML">
+                            Активировать
+                        </button>
+                    {% endif %}
+
+                    <button
+                        class="button"
+                        style="background: #dc2626;"
+                        hx-delete="/app/users/{{ user.id }}"
+                        hx-confirm="Удалить пользователя?"
+                        hx-target="#user-edit-modal"
+                        hx-swap="innerHTML">
+                        Удалить
+                    </button>
+                </div>
+            </td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="8" class="empty-cell">Пользователей нет</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

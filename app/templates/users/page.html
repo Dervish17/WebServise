@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Пользователи{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Пользователи</h2>
+
+<form
+    id="create-user-form"
+    hx-post="/app/users/create"
+    hx-target="#create-user-result"
+    hx-swap="innerHTML"
+    hx-on::after-request="if(event.detail.successful) this.reset()"
+    class="card"
+    style="margin-bottom: 20px;">
+
+    <div class="detail-row">
+        <label><strong>Фамилия</strong></label>
+        <input class="select full-width" type="text" name="last_name">
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Имя</strong></label>
+        <input class="select full-width" type="text" name="first_name">
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Отчество</strong></label>
+        <input class="select full-width" type="text" name="middle_name">
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Email</strong></label>
+        <input class="select full-width" type="email" name="email" required>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Пароль</strong></label>
+        <input class="select full-width" type="password" name="password" required>
+    </div>
+
+    <div class="detail-row">
+        <label><strong>Роль</strong></label>
+        <select class="select full-width" name="role" required>
+            <option value="admin">admin</option>
+            <option value="manager">manager</option>
+            <option value="engineer">engineer</option>
+        </select>
+    </div>
+
+    <div class="detail-actions">
+        <button type="submit" class="button button-blue">Создать пользователя</button>
+    </div>
+
+    <div id="create-user-result"></div>
+</form>
+
+<div
+    id="users-table"
+    hx-get="/app/users/table"
+    hx-trigger="load, refreshUsers from:body"
+    hx-swap="innerHTML">
+    Загрузка...
+</div>
+<div id="user-edit-modal" style="margin-top: 20px;"></div>
+{% endblock %}

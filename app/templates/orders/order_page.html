@@ -24,7 +24,8 @@
         </a>
     </div>
 
-    <div class="order-detail-wrap">
+    <div id="order-detail" class="order-detail-wrap">
+        {% set standalone = True %}
         {% include "orders/_detail.html" %}
     </div>
 </div>

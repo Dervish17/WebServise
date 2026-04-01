@@ -10,7 +10,7 @@
     <button
         class="button"
         style="background: #dc2626;"
-        hx-delete="/app/equipment/{{ equipment.id }}"
+        hx-delete="/app/equipment/{{ equipment.id }}{% if standalone %}?redirect_to_list=1{% endif %}"
         hx-confirm="Удалить оборудование?"
         hx-target="#equipment-detail"
         hx-swap="innerHTML">

@@ -12,12 +12,38 @@
     <header class="topbar">
         <div class="topbar-inner">
             <h1 class="topbar-title">Профсервис</h1>
-            <nav>
-                <a href="/app/orders" class="topbar-link">Заявки</a>
-                <a href="/app/clients" class="topbar-link">Клиенты</a>
-                <a href="/app/equipment" class="topbar-link">Оборудование</a>
-                <a href="/app/logout" class="topbar-link">Выход</a>
-            </nav>
+
+            <div style="display: flex; align-items: center; gap: 18px;">
+                <nav style="display: flex; gap: 14px;">
+                    <a href="/app/orders" class="topbar-link">Заявки</a>
+                    <a href="/app/clients" class="topbar-link">Клиенты</a>
+                    <a href="/app/equipment" class="topbar-link">Оборудование</a>
+                    <a href="/app/users" class="topbar-link">Пользователи</a>
+                </nav>
+
+                {% if request.state.current_user %}
+                    <div style="color: white; font-size: 14px; text-align: right;">
+                        <div>
+                            {{ request.state.current_user.last_name or "" }}
+                            {{ request.state.current_user.first_name or "" }}
+                            {{ request.state.current_user.middle_name or "" }}
+                        </div>
+                        <div style="opacity: 0.8;">
+                            {% if request.state.current_user.role == "admin" %}
+                                Администратор
+                            {% elif request.state.current_user.role == "manager" %}
+                                Менеджер
+                            {% elif request.state.current_user.role == "engineer" %}
+                                Инженер
+                            {% else %}
+                                {{ request.state.current_user.role }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <a href="/app/logout" class="topbar-link">Выход</a>
+                {% endif %}
+            </div>
         </div>
     </header>
 

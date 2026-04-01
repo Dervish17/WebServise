@@ -16,6 +16,7 @@ from app.models.equipment import Equipment
 from app.services.equipment_service import create_equipment, get_equipment_by_id, update_equipment, delete_equipment, \
     get_all_equipment
 from app.services.auth_service import login_user
+from app.services.user_service import create_user, update_user, delete_user, toggle_user_active
 from app.services.client_service import get_all_clients, get_client_by_id, create_client, update_client, delete_client
 from app.core.dependencies import get_current_user
 
@@ -208,7 +209,10 @@ def render_order_detail(request: Request, db: Session, order_id: int):
 
     engineers = (
         db.query(User)
-        .filter(User.role == "engineer")
+        .filter(
+            User.role == "engineer",
+            User.is_active == True,
+        )
         .order_by(User.email.asc())
         .all()
     )
@@ -670,10 +674,16 @@ def edit_order_submit(
 
 @router.delete("/app/orders/{order_id}")
 def delete_order_ui(
-        order_id: int,
-        db: Session = Depends(get_db),
+    order_id: int,
+    redirect_to_list: bool = False,
+    db: Session = Depends(get_db),
 ):
     delete_order(db, order_id)
+
+    if redirect_to_list:
+        response = HTMLResponse("")
+        response.headers["HX-Redirect"] = "/app/orders"
+        return response
 
     response = HTMLResponse('<p class="muted">Заявка удалена.</p>')
     response.headers["HX-Trigger"] = "refreshOrders"
@@ -711,11 +721,17 @@ def create_order_ui(
 
 @router.delete("/app/clients/{client_id}")
 def delete_client_ui(
-        client_id: int,
-        db: Session = Depends(get_db),
+    client_id: int,
+    redirect_to_list: bool = False,
+    db: Session = Depends(get_db),
 ):
     try:
         delete_client(db, client_id)
+
+        if redirect_to_list:
+            response = HTMLResponse("")
+            response.headers["HX-Redirect"] = "/app/clients"
+            return response
 
         response = HTMLResponse('<p class="muted">Клиент удалён.</p>')
         response.headers["HX-Trigger"] = "refreshClients"
@@ -729,11 +745,17 @@ def delete_client_ui(
 
 @router.delete("/app/equipment/{equipment_id}")
 def delete_equipment_ui(
-        equipment_id: int,
-        db: Session = Depends(get_db),
+    equipment_id: int,
+    redirect_to_list: bool = False,
+    db: Session = Depends(get_db),
 ):
     try:
         delete_equipment(db, equipment_id)
+
+        if redirect_to_list:
+            response = HTMLResponse("")
+            response.headers["HX-Redirect"] = "/app/equipment"
+            return response
 
         response = HTMLResponse('<p class="muted">Оборудование удалено.</p>')
         response.headers["HX-Trigger"] = "refreshEquipment"
@@ -783,3 +805,175 @@ def logout():
     response.delete_cookie("access_token", path="/")
     response.delete_cookie("ui_user_email", path="/")
     return response
+
+@router.get("/app/users")
+def users_page(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "users/page.html",
+        {},
+    )
+
+
+@router.get("/app/users/table")
+def users_table(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    users = db.query(User).order_by(User.id.desc()).all()
+
+    return templates.TemplateResponse(
+        request,
+        "users/_table.html",
+        {"users": users},
+    )
+
+@router.post("/app/users/create")
+def create_user_ui(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    role: str = Form(...),
+    last_name: str = Form(None),
+    first_name: str = Form(None),
+    middle_name: str = Form(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
+):
+    if current_user.role != "admin":
+        return HTMLResponse(
+            '<p class="muted" style="color:#dc2626;">Только администратор может создавать пользователей.</p>'
+        )
+
+    create_user(
+        db=db,
+        email=email,
+        password=password,
+        role=role,
+        last_name=last_name,
+        first_name=first_name,
+        middle_name=middle_name,
+    )
+
+    response = templates.TemplateResponse(
+        request,
+        "users/_create_result.html",
+        {},
+    )
+    response.headers["HX-Trigger"] = "refreshUsers"
+    return response
+
+@router.get("/app/users/{user_id}/edit")
+def edit_user_form(
+    user_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
+):
+    if current_user.role != "admin":
+        return HTMLResponse(
+            '<p class="muted" style="color:#dc2626;">Только администратор может редактировать пользователей.</p>'
+        )
+
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        return HTMLResponse(
+            '<p class="muted" style="color:#dc2626;">Пользователь не найден.</p>'
+        )
+
+    return templates.TemplateResponse(
+        request,
+        "users/_edit.html",
+        {"user": user},
+    )
+
+@router.post("/app/users/{user_id}/edit")
+def edit_user_submit(
+    user_id: int,
+    request: Request,
+    email: str = Form(...),
+    role: str = Form(...),
+    last_name: str = Form(None),
+    first_name: str = Form(None),
+    middle_name: str = Form(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
+):
+    if current_user.role != "admin":
+        return HTMLResponse(
+            '<p class="muted" style="color:#dc2626;">Только администратор может редактировать пользователей.</p>'
+        )
+
+    try:
+        update_user(
+            db=db,
+            user_id=user_id,
+            email=email,
+            role=role,
+            last_name=last_name,
+            first_name=first_name,
+            middle_name=middle_name,
+        )
+    except ValueError:
+        return HTMLResponse(
+            '<p class="muted" style="color:#dc2626;">Пользователь не найден.</p>'
+        )
+
+    response = HTMLResponse("")
+    response.headers["HX-Trigger"] = "refreshUsers"
+    return response
+
+@router.delete("/app/users/{user_id}")
+def delete_user_ui(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
+):
+    if current_user.role != "admin":
+        return HTMLResponse(
+            '<p class="muted" style="color:#dc2626;">Только администратор может удалять пользователей.</p>'
+        )
+
+    try:
+        delete_user(
+            db=db,
+            user_id=user_id,
+            current_user_id=current_user.id,
+        )
+
+        response = HTMLResponse("")
+        response.headers["HX-Trigger"] = "refreshUsers"
+        return response
+
+    except HTTPException as e:
+        return HTMLResponse(
+            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
+        )
+
+@router.post("/app/users/{user_id}/toggle-active")
+def toggle_user_active_ui(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_ui_user),
+):
+    if current_user.role != "admin":
+        return HTMLResponse(
+            '<p class="muted" style="color:#dc2626;">Только администратор может менять статус пользователей.</p>'
+        )
+
+    try:
+        toggle_user_active(
+            db=db,
+            user_id=user_id,
+            current_user_id=current_user.id,
+        )
+
+        response = HTMLResponse("")
+        response.headers["HX-Trigger"] = "refreshUsers"
+        return response
+
+    except HTTPException as e:
+        return HTMLResponse(
+            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
+        )

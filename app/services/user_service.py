@@ -1,16 +1,132 @@
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from app.models.order import Order
+from app.models.order_log import OrderLog
+from app.models.status_history import StatusHistory
 from app.models.user import User
 from app.core.security import hash_password
 
 
-def create_user(db: Session, email: str, password: str, role: str):
+def create_user(
+    db: Session,
+    email: str,
+    password: str,
+    role: str,
+    last_name: str | None = None,
+    first_name: str | None = None,
+    middle_name: str | None = None,
+) -> User:
     user = User(
         email=email,
         hashed_password=hash_password(password),
-        role=role
+        last_name=last_name,
+        first_name=first_name,
+        middle_name=middle_name,
+        role=role,
     )
 
     db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+def update_user(
+    db: Session,
+    user_id: int,
+    email: str,
+    role: str,
+    last_name: str | None = None,
+    first_name: str | None = None,
+    middle_name: str | None = None,
+) -> User:
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise ValueError("User not found")
+
+    user.email = email
+    user.role = role
+    user.last_name = last_name
+    user.first_name = first_name
+    user.middle_name = middle_name
+
+    db.commit()
+    db.refresh(user)
+
+    return user
+
+def delete_user(
+    db: Session,
+    user_id: int,
+    current_user_id: int,
+) -> None:
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    if user.id == current_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить самого себя",
+        )
+
+    created_order = db.query(Order).filter(Order.created_by == user.id).first()
+    if created_order:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить пользователя: он создавал заявки",
+        )
+
+    assigned_order = db.query(Order).filter(Order.assigned_to == user.id).first()
+    if assigned_order:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить пользователя: он назначен на заявки",
+        )
+
+    order_log = db.query(OrderLog).filter(OrderLog.user_id == user.id).first()
+    if order_log:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить пользователя: у него есть записи в истории действий",
+        )
+
+    status_history = db.query(StatusHistory).filter(StatusHistory.changed_by == user.id).first()
+    if status_history:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя удалить пользователя: у него есть история смены статусов",
+        )
+
+    db.delete(user)
+    db.commit()
+
+def toggle_user_active(
+    db: Session,
+    user_id: int,
+    current_user_id: int,
+) -> User:
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    if user.id == current_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Нельзя деактивировать самого себя",
+        )
+
+    user.is_active = not user.is_active
+
     db.commit()
     db.refresh(user)
 

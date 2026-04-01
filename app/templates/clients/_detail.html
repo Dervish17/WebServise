@@ -10,7 +10,7 @@
     <button
         class="button"
         style="background: #dc2626;"
-        hx-delete="/app/clients/{{ client.id }}"
+        hx-delete="/app/clients/{{ client.id }}{% if standalone %}?redirect_to_list=1{% endif %}"
         hx-confirm="Удалить клиента?"
         hx-target="#client-detail"
         hx-swap="innerHTML">
