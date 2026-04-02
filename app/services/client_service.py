@@ -31,8 +31,12 @@ def create_client(
     return client
 
 
-def get_all_clients(db: Session, search: str | None = None):
-    query = db.query(Client).order_by(Client.id.desc())
+def get_all_clients(
+    db: Session,
+    search: str | None = None,
+    sort: str = "newest",
+):
+    query = db.query(Client)
 
     if search:
         query = query.filter(
@@ -43,6 +47,15 @@ def get_all_clients(db: Session, search: str | None = None):
             (Client.address.ilike(f"%{search}%")) |
             (Client.notes.ilike(f"%{search}%"))
         )
+
+    if sort == "oldest":
+        query = query.order_by(Client.id.asc())
+    elif sort == "name_asc":
+        query = query.order_by(Client.name.asc())
+    elif sort == "name_desc":
+        query = query.order_by(Client.name.desc())
+    else:
+        query = query.order_by(Client.id.desc())
 
     return query.all()
 

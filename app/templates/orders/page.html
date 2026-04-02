@@ -78,7 +78,7 @@
             hx-get="/app/orders/table"
             hx-target="#orders-table"
             hx-swap="innerHTML"
-            hx-include="#order-search">
+            hx-include="#order-search, #order-sort">
             <option value="">Все</option>
             <option value="new">Новая</option>
             <option value="in_progress">В работе</option>
@@ -98,7 +98,22 @@
             hx-trigger="input changed delay:400ms"
             hx-target="#orders-table"
             hx-swap="innerHTML"
-            hx-include="#status">
+            hx-include="#status, #order-sort">
+    </div>
+
+    <div>
+        <label for="order-sort" class="mb-1 block font-semibold text-slate-700">Сортировка</label>
+        <select
+            id="order-sort"
+            name="sort"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/orders/table"
+            hx-target="#orders-table"
+            hx-swap="innerHTML"
+            hx-include="#status, #order-search">
+            <option value="newest">Сначала новые</option>
+            <option value="oldest">Сначала старые</option>
+        </select>
     </div>
 </div>
 

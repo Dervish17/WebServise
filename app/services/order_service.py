@@ -87,6 +87,7 @@ def filter_orders(
         assigned_to: int | None = None,
         created_by: int | None = None,
         search: str | None = None,
+        sort: str = "newest",
         limit: int = 10,
         offset: int = 0,
 ) -> list[Order]:
@@ -123,12 +124,12 @@ def filter_orders(
             (Equipment.serial_number.ilike(f"%{search}%"))
         )
 
-    return (
-        query.order_by(Order.created_at.desc())
-        .offset(offset)
-        .limit(limit)
-        .all()
-    )
+    if sort == "oldest":
+        query = query.order_by(Order.created_at.asc())
+    else:
+        query = query.order_by(Order.created_at.desc())
+
+    return query.offset(offset).limit(limit).all()
 
 
 def get_order_by_id(db: Session, order_id: int) -> Order:

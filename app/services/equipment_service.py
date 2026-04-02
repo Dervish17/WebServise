@@ -7,12 +7,12 @@ from app.models.order import Order
 
 
 def create_equipment(
-    db: Session,
-    name: str,
-    client_id: int,
-    model: str | None = None,
-    serial_number: str | None = None,
-    manufacturer: str | None = None,
+        db: Session,
+        name: str,
+        client_id: int,
+        model: str | None = None,
+        serial_number: str | None = None,
+        manufacturer: str | None = None,
 ) -> Equipment:
     client = db.query(Client).filter(Client.id == client_id).first()
 
@@ -37,12 +37,15 @@ def create_equipment(
     return equipment
 
 
-def get_all_equipment(db: Session, search: str | None = None):
+def get_all_equipment(
+        db: Session,
+        search: str | None = None,
+        sort: str = "newest",
+):
     query = (
         db.query(Equipment)
         .options(joinedload(Equipment.client))
         .join(Equipment.client)
-        .order_by(Equipment.id.desc())
     )
 
     if search:
@@ -53,6 +56,15 @@ def get_all_equipment(db: Session, search: str | None = None):
             (Equipment.manufacturer.ilike(f"%{search}%")) |
             (Client.name.ilike(f"%{search}%"))
         )
+
+    if sort == "oldest":
+        query = query.order_by(Equipment.id.asc())
+    elif sort == "name_asc":
+        query = query.order_by(Equipment.name.asc())
+    elif sort == "name_desc":
+        query = query.order_by(Equipment.name.desc())
+    else:
+        query = query.order_by(Equipment.id.desc())
 
     return query.all()
 
@@ -68,13 +80,14 @@ def get_equipment_by_id(db: Session, equipment_id: int) -> type[Equipment]:
 
     return equipment
 
+
 def update_equipment(
-    db: Session,
-    equipment_id: int,
-    name: str,
-    model: str | None = None,
-    serial_number: str | None = None,
-    manufacturer: str | None = None,
+        db: Session,
+        equipment_id: int,
+        name: str,
+        model: str | None = None,
+        serial_number: str | None = None,
+        manufacturer: str | None = None,
 ) -> Equipment:
     equipment = get_equipment_by_id(db, equipment_id)
 
@@ -87,6 +100,7 @@ def update_equipment(
     db.refresh(equipment)
 
     return equipment
+
 
 def delete_equipment(db: Session, equipment_id: int) -> None:
     equipment = get_equipment_by_id(db, equipment_id)

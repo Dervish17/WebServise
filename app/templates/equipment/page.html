@@ -4,18 +4,38 @@
 
 {% block content %}
 <h2 class="mb-4 text-2xl font-bold text-slate-800">Оборудование</h2>
-<div class="mb-4">
-    <label for="equipment-search" class="mb-1 block font-semibold text-slate-700">Поиск по оборудованию</label>
-    <input
-        id="equipment-search"
-        name="search"
-        type="text"
-        placeholder="Название, модель, серийный номер, производитель, клиент..."
-        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-        hx-get="/app/equipment/table"
-        hx-trigger="input changed delay:400ms"
-        hx-target="#equipment-table"
-        hx-swap="innerHTML">
+<div class="mb-4 flex flex-wrap items-end gap-3">
+    <div class="min-w-[280px] flex-1">
+        <label for="equipment-search" class="mb-1 block font-semibold text-slate-700">Поиск по оборудованию</label>
+        <input
+            id="equipment-search"
+            name="search"
+            type="text"
+            placeholder="Название, модель, серийный номер, производитель, клиент..."
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/equipment/table"
+            hx-trigger="input changed delay:400ms"
+            hx-target="#equipment-table"
+            hx-swap="innerHTML"
+            hx-include="#equipment-sort">
+    </div>
+
+    <div>
+        <label for="equipment-sort" class="mb-1 block font-semibold text-slate-700">Сортировка</label>
+        <select
+            id="equipment-sort"
+            name="sort"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/equipment/table"
+            hx-target="#equipment-table"
+            hx-swap="innerHTML"
+            hx-include="#equipment-search">
+            <option value="newest">Сначала новые</option>
+            <option value="oldest">Сначала старые</option>
+            <option value="name_asc">По названию А-Я</option>
+            <option value="name_desc">По названию Я-А</option>
+        </select>
+    </div>
 </div>
 <div class="flex items-start gap-5 h-[calc(100vh-160px)]">
     <div

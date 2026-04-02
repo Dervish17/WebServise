@@ -98,12 +98,14 @@ def orders_table(
         request: Request,
         status: str | None = None,
         search: str | None = None,
+        sort: str = "newest",
         db: Session = Depends(get_db),
 ):
     orders = filter_orders(
         db=db,
         status=status,
         search=search,
+        sort=sort,
         limit=20,
         offset=0,
     )
@@ -255,9 +257,10 @@ def clients_page(request: Request):
 def clients_table(
     request: Request,
     search: str | None = None,
+    sort: str = "newest",
     db: Session = Depends(get_db),
 ):
-    clients = get_all_clients(db, search=search)
+    clients = get_all_clients(db, search=search, sort=sort)
 
     return templates.TemplateResponse(
         request,
@@ -384,9 +387,10 @@ def equipment_page(request: Request):
 def equipment_table(
     request: Request,
     search: str | None = None,
+    sort: str = "newest",
     db: Session = Depends(get_db),
 ):
-    equipments = get_all_equipment(db, search=search)
+    equipments = get_all_equipment(db, search=search, sort=sort)
 
     return templates.TemplateResponse(
         request,
