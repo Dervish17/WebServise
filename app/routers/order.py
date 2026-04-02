@@ -98,11 +98,7 @@ def change_status_endpoint(
     )
 
 
-@router.post(
-    "/{order_id}/comment",
-    response_model=OrderLogResponse,
-    status_code=status.HTTP_201_CREATED,
-)
+@router.post("/{order_id}/comment", response_model=OrderLogResponse, status_code=status.HTTP_201_CREATED)
 def add_comment_endpoint(
     order_id: int,
     data: CreateCommentRequest,
