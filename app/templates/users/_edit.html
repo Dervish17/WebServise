@@ -30,9 +30,9 @@
         <div class="mb-4">
             <label class="mb-1 block font-semibold text-slate-700">Роль</label>
             <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="role" required>
-                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>admin</option>
-                <option value="manager" {% if user.role == "manager" %}selected{% endif %}>manager</option>
-                <option value="engineer" {% if user.role == "engineer" %}selected{% endif %}>engineer</option>
+                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Администратор</option>
+                <option value="manager" {% if user.role == "manager" %}selected{% endif %}>Менеджер</option>
+                <option value="engineer" {% if user.role == "engineer" %}selected{% endif %}>Инженер</option>
             </select>
         </div>
 

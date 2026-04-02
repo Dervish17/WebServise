@@ -6,8 +6,8 @@ from app.models.equipment import Equipment
 from app.models.order import Order
 from app.models.order_log import OrderLog
 from app.models.user import User
+from app.models.client import Client
 from app.models.status_history import StatusHistory
-
 
 ALLOWED_TRANSITIONS = {
     OrderStatus.new.value: [OrderStatus.in_progress.value],
@@ -17,11 +17,11 @@ ALLOWED_TRANSITIONS = {
 
 
 def _create_order_log(
-    db: Session,
-    order_id: int,
-    action: str,
-    description: str,
-    user_id: int,
+        db: Session,
+        order_id: int,
+        action: str,
+        description: str,
+        user_id: int,
 ) -> OrderLog:
     log = OrderLog(
         order_id=order_id,
@@ -34,12 +34,12 @@ def _create_order_log(
 
 
 def create_order(
-    db: Session,
-    title: str,
-    description: str,
-    equipment_id: int,
-    current_user: User,
-    total_cost=None,
+        db: Session,
+        title: str,
+        description: str,
+        equipment_id: int,
+        current_user: User,
+        total_cost=None,
 ) -> Order:
     equipment = db.query(Equipment).filter(Equipment.id == equipment_id).first()
 
@@ -81,13 +81,14 @@ def create_order(
 
 
 def filter_orders(
-    db: Session,
-    status: str | None = None,
-    client_id: int | None = None,
-    assigned_to: int | None = None,
-    created_by: int | None = None,
-    limit: int = 10,
-    offset: int = 0,
+        db: Session,
+        status: str | None = None,
+        client_id: int | None = None,
+        assigned_to: int | None = None,
+        created_by: int | None = None,
+        search: str | None = None,
+        limit: int = 10,
+        offset: int = 0,
 ) -> list[Order]:
     query = (
         db.query(Order)
@@ -98,6 +99,7 @@ def filter_orders(
             joinedload(Order.assignee),
         )
     )
+    query = query.join(Order.client).join(Order.equipment)
 
     if status:
         query = query.filter(Order.status == status)
@@ -110,6 +112,16 @@ def filter_orders(
 
     if created_by:
         query = query.filter(Order.created_by == created_by)
+
+    if search:
+        query = query.filter(
+            (Order.title.ilike(f"%{search}%")) |
+            (Order.description.ilike(f"%{search}%")) |
+            (Client.name.ilike(f"%{search}%")) |
+            (Equipment.name.ilike(f"%{search}%")) |
+            (Equipment.model.ilike(f"%{search}%")) |
+            (Equipment.serial_number.ilike(f"%{search}%"))
+        )
 
     return (
         query.order_by(Order.created_at.desc())
@@ -142,10 +154,10 @@ def get_order_by_id(db: Session, order_id: int) -> Order:
 
 
 def assign_order(
-    db: Session,
-    order_id: int,
-    user_id: int,
-    current_user: User,
+        db: Session,
+        order_id: int,
+        user_id: int,
+        current_user: User,
 ) -> Order:
     order = get_order_by_id(db, order_id)
 
@@ -176,11 +188,15 @@ def assign_order(
 
     order.assigned_to = user.id
 
+    engineer_name = " ".join(
+        part for part in [user.last_name, user.first_name, user.middle_name] if part
+    ).strip()
+
     _create_order_log(
         db=db,
         order_id=order.id,
         action="assign",
-        description=f"Назначен инженер: {user.email}",
+        description=f"Назначен инженер: {engineer_name if engineer_name else user.email}",
         user_id=current_user.id,
     )
 
@@ -191,10 +207,10 @@ def assign_order(
 
 
 def change_status(
-    db: Session,
-    order_id: int,
-    new_status: OrderStatus,
-    current_user: User,
+        db: Session,
+        order_id: int,
+        new_status: OrderStatus,
+        current_user: User,
 ) -> Order:
     order = get_order_by_id(db, order_id)
 
@@ -239,10 +255,10 @@ def change_status(
 
 
 def add_comment(
-    db: Session,
-    order_id: int,
-    text: str,
-    current_user: User,
+        db: Session,
+        order_id: int,
+        text: str,
+        current_user: User,
 ) -> OrderLog:
     order = get_order_by_id(db, order_id)
 
@@ -259,12 +275,13 @@ def add_comment(
 
     return log
 
+
 def update_order(
-    db: Session,
-    order_id: int,
-    title: str,
-    description: str | None = None,
-    total_cost=None,
+        db: Session,
+        order_id: int,
+        title: str,
+        description: str | None = None,
+        total_cost=None,
 ) -> Order:
     order = get_order_by_id(db, order_id)
 
@@ -276,6 +293,7 @@ def update_order(
     db.refresh(order)
 
     return order
+
 
 def delete_order(db: Session, order_id: int) -> None:
     order = get_order_by_id(db, order_id)

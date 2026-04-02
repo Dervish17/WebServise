@@ -23,6 +23,17 @@ from app.core.dependencies import get_current_user
 router = APIRouter(tags=["ui"])
 templates = Jinja2Templates(directory="app/templates")
 
+def render_alert(request: Request, text: str, kind: str = "success", status_code: int = 200):
+    return templates.TemplateResponse(
+        request,
+        "shared/_alert.html",
+        {
+            "text": text,
+            "kind": kind,
+        },
+        status_code=status_code,
+    )
+
 def get_current_ui_user(
     ui_user_email: str | None = Cookie(default=None),
     db: Session = Depends(get_db),
@@ -86,11 +97,13 @@ def orders_page(
 def orders_table(
         request: Request,
         status: str | None = None,
+        search: str | None = None,
         db: Session = Depends(get_db),
 ):
     orders = filter_orders(
         db=db,
         status=status,
+        search=search,
         limit=20,
         offset=0,
     )
@@ -240,10 +253,11 @@ def clients_page(request: Request):
 
 @router.get("/app/clients/table")
 def clients_table(
-        request: Request,
-        db: Session = Depends(get_db),
+    request: Request,
+    search: str | None = None,
+    db: Session = Depends(get_db),
 ):
-    clients = get_all_clients(db)
+    clients = get_all_clients(db, search=search)
 
     return templates.TemplateResponse(
         request,
@@ -368,15 +382,11 @@ def equipment_page(request: Request):
 
 @router.get("/app/equipment/table")
 def equipment_table(
-        request: Request,
-        db: Session = Depends(get_db),
+    request: Request,
+    search: str | None = None,
+    db: Session = Depends(get_db),
 ):
-    equipments = (
-        db.query(Equipment)
-        .options(joinedload(Equipment.client))
-        .order_by(Equipment.id.desc())
-        .all()
-    )
+    equipments = get_all_equipment(db, search=search)
 
     return templates.TemplateResponse(
         request,
@@ -675,6 +685,7 @@ def edit_order_submit(
 @router.delete("/app/orders/{order_id}")
 def delete_order_ui(
     order_id: int,
+    request: Request,
     redirect_to_list: bool = False,
     db: Session = Depends(get_db),
 ):
@@ -685,7 +696,7 @@ def delete_order_ui(
         response.headers["HX-Redirect"] = "/app/orders"
         return response
 
-    response = HTMLResponse('<p class="muted">Заявка удалена.</p>')
+    response = render_alert(request, "Заявка удалена.", "success")
     response.headers["HX-Trigger"] = "refreshOrders"
     return response
 
@@ -722,6 +733,7 @@ def create_order_ui(
 @router.delete("/app/clients/{client_id}")
 def delete_client_ui(
     client_id: int,
+    request: Request,
     redirect_to_list: bool = False,
     db: Session = Depends(get_db),
 ):
@@ -733,19 +745,18 @@ def delete_client_ui(
             response.headers["HX-Redirect"] = "/app/clients"
             return response
 
-        response = HTMLResponse('<p class="muted">Клиент удалён.</p>')
+        response = render_alert(request, "Клиент удалён.", "success")
         response.headers["HX-Trigger"] = "refreshClients"
         return response
 
     except HTTPException as e:
-        return HTMLResponse(
-            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
-        )
+        return render_alert(request, e.detail, "error")
 
 
 @router.delete("/app/equipment/{equipment_id}")
 def delete_equipment_ui(
     equipment_id: int,
+    request: Request,
     redirect_to_list: bool = False,
     db: Session = Depends(get_db),
 ):
@@ -757,14 +768,12 @@ def delete_equipment_ui(
             response.headers["HX-Redirect"] = "/app/equipment"
             return response
 
-        response = HTMLResponse('<p class="muted">Оборудование удалено.</p>')
+        response = render_alert(request, "Оборудование удалено.", "success")
         response.headers["HX-Trigger"] = "refreshEquipment"
         return response
 
     except HTTPException as e:
-        return HTMLResponse(
-            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
-        )
+        return render_alert(request, e.detail, "error")
 
 @router.get("/app/login")
 def login_page(request: Request):
@@ -776,13 +785,44 @@ def login_page(request: Request):
 
 @router.post("/app/login")
 def login_submit(
+    request: Request,
     email: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
-    token = login_user(db, email, password)
+    try:
+        result = login_user(db, email, password)
+    except HTTPException:
+        return templates.TemplateResponse(
+            request,
+            "auth/login.html",
+            {
+                "error": "Неверный email, пароль или пользователь деактивирован.",
+                "email": email,
+            },
+            status_code=400,
+        )
+
+    token = None
+
+    if isinstance(result, str):
+        token = result
+    elif isinstance(result, dict):
+        token = result.get("access_token")
+
+    if not token:
+        return templates.TemplateResponse(
+            request,
+            "auth/login.html",
+            {
+                "error": "Неверный email, пароль или пользователь деактивирован.",
+                "email": email,
+            },
+            status_code=400,
+        )
 
     response = RedirectResponse(url="/app/orders", status_code=303)
+
     response.set_cookie(
         key="access_token",
         value=token,
@@ -790,6 +830,7 @@ def login_submit(
         samesite="lax",
         path="/",
     )
+
     response.set_cookie(
         key="ui_user_email",
         value=email,
@@ -797,6 +838,7 @@ def login_submit(
         samesite="lax",
         path="/",
     )
+
     return response
 
 @router.get("/app/logout")
@@ -841,9 +883,7 @@ def create_user_ui(
     current_user: User = Depends(get_current_ui_user),
 ):
     if current_user.role != "admin":
-        return HTMLResponse(
-            '<p class="muted" style="color:#dc2626;">Только администратор может создавать пользователей.</p>'
-        )
+        return render_alert(request, "Только администратор может создавать пользователей.", "error")
 
     create_user(
         db=db,
@@ -871,16 +911,12 @@ def edit_user_form(
     current_user: User = Depends(get_current_ui_user),
 ):
     if current_user.role != "admin":
-        return HTMLResponse(
-            '<p class="muted" style="color:#dc2626;">Только администратор может редактировать пользователей.</p>'
-        )
+        return render_alert(request, "Только администратор может редактировать пользователей.", "error")
 
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        return HTMLResponse(
-            '<p class="muted" style="color:#dc2626;">Пользователь не найден.</p>'
-        )
+        return render_alert(request, "Пользователь не найден.", "error")
 
     return templates.TemplateResponse(
         request,
@@ -901,9 +937,7 @@ def edit_user_submit(
     current_user: User = Depends(get_current_ui_user),
 ):
     if current_user.role != "admin":
-        return HTMLResponse(
-            '<p class="muted" style="color:#dc2626;">Только администратор может редактировать пользователей.</p>'
-        )
+        return render_alert(request, "Только администратор может редактировать пользователей.", "error")
 
     try:
         update_user(
@@ -916,9 +950,7 @@ def edit_user_submit(
             middle_name=middle_name,
         )
     except ValueError:
-        return HTMLResponse(
-            '<p class="muted" style="color:#dc2626;">Пользователь не найден.</p>'
-        )
+        return render_alert(request, "Пользователь не найден.", "error")
 
     response = HTMLResponse("")
     response.headers["HX-Trigger"] = "refreshUsers"
@@ -927,13 +959,12 @@ def edit_user_submit(
 @router.delete("/app/users/{user_id}")
 def delete_user_ui(
     user_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_ui_user),
 ):
     if current_user.role != "admin":
-        return HTMLResponse(
-            '<p class="muted" style="color:#dc2626;">Только администратор может удалять пользователей.</p>'
-        )
+        return render_alert(request, "Только администратор может удалять пользователей.", "error")
 
     try:
         delete_user(
@@ -947,20 +978,17 @@ def delete_user_ui(
         return response
 
     except HTTPException as e:
-        return HTMLResponse(
-            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
-        )
+        return render_alert(request, e.detail, "error")
 
 @router.post("/app/users/{user_id}/toggle-active")
 def toggle_user_active_ui(
     user_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_ui_user),
 ):
     if current_user.role != "admin":
-        return HTMLResponse(
-            '<p class="muted" style="color:#dc2626;">Только администратор может менять статус пользователей.</p>'
-        )
+        return render_alert(request, "Только администратор может менять статус пользователей.", "error")
 
     try:
         toggle_user_active(
@@ -974,6 +1002,4 @@ def toggle_user_active_ui(
         return response
 
     except HTTPException as e:
-        return HTMLResponse(
-            f'<p class="muted" style="color:#dc2626;">{e.detail}</p>'
-        )
+        return render_alert(request, e.detail, "error")

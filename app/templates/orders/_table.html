@@ -1,3 +1,5 @@
+{% from "_macros.html" import person_name %}
+
 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
     <table class="min-w-full divide-y divide-slate-200">
         <thead class="bg-slate-50">
@@ -15,21 +17,25 @@
         <tbody class="divide-y divide-slate-100">
         {% for order in orders %}
             <tr
-                class="orders-row cursor-pointer transition hover:bg-slate-50{% if loop.first %} active{% endif %}"
+                class="orders-row cursor-pointer transition"
                 hx-get="/app/orders/{{ order.id }}/detail"
                 hx-target="#order-detail"
                 hx-swap="innerHTML"
                 onclick="
-                    document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
-                    this.classList.add('active');
+                    document.querySelectorAll('.orders-row td').forEach(cell => {
+                        cell.classList.remove('bg-blue-50');
+                    });
+                    this.querySelectorAll('td').forEach(cell => {
+                        cell.classList.add('bg-blue-50');
+                    });
                 ">
-                <td class="px-4 py-3 text-sm text-slate-700">{{ order.id }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">{{ order.id }}</td>
 
-                <td class="px-4 py-3 text-sm font-medium text-slate-800">
+                <td class="px-4 py-3 text-sm font-medium text-slate-800{% if loop.first %} bg-blue-50{% endif %}">
                     {{ order.title }}
                 </td>
 
-                <td class="px-4 py-3 text-sm">
+                <td class="px-4 py-3 text-sm{% if loop.first %} bg-blue-50{% endif %}">
                     {% if order.status == "new" %}
                         <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
                     {% elif order.status == "in_progress" %}
@@ -41,19 +47,19 @@
                     {% endif %}
                 </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700">
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
                     {{ order.client.name if order.client else "-" }}
                 </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700">
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
                     {{ order.equipment.name if order.equipment else "-" }}
                 </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700">
-                    {{ order.assignee.email if order.assignee else "-" }}
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                    {{ person_name(order.assignee) }}
                 </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700">
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
                     {{ order.total_cost if order.total_cost is not none else "-" }}
                 </td>
             </tr>

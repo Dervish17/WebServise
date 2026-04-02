@@ -14,20 +14,24 @@
         <tbody class="divide-y divide-slate-100">
         {% for equipment in equipments %}
             <tr
-                class="orders-row cursor-pointer transition hover:bg-slate-50{% if loop.first %} active{% endif %}"
+                class="orders-row cursor-pointer transition"
                 hx-get="/app/equipment/{{ equipment.id }}/detail"
                 hx-target="#equipment-detail"
                 hx-swap="innerHTML"
                 onclick="
-                    document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
-                    this.classList.add('active');
+                    document.querySelectorAll('.orders-row td').forEach(cell => {
+                        cell.classList.remove('bg-blue-50');
+                    });
+                    this.querySelectorAll('td').forEach(cell => {
+                        cell.classList.add('bg-blue-50');
+                    });
                 ">
-                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.id }}</td>
-                <td class="px-4 py-3 text-sm font-medium text-slate-800">{{ equipment.name or "-" }}</td>
-                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.model or "-" }}</td>
-                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.serial_number or "-" }}</td>
-                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.manufacturer or "-" }}</td>
-                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.client.name if equipment.client else "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">{{ equipment.id }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-800{% if loop.first %} bg-blue-50{% endif %}">{{ equipment.name or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">{{ equipment.model or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">{{ equipment.serial_number or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">{{ equipment.manufacturer or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">{{ equipment.client.name if equipment.client else "-" }}</td>
             </tr>
         {% else %}
             <tr>

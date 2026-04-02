@@ -30,43 +30,53 @@
 
 <h4 class="mb-3 text-lg font-semibold">Добавить оборудование</h4>
 
+<hr class="my-5 border-t border-slate-200">
+
 <form
     hx-post="/app/clients/{{ client.id }}/equipment/create"
     hx-target="#client-detail"
-    hx-swap="innerHTML">
-    <input
-        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-        type="text"
-        name="name"
-        placeholder="Название оборудования"
-        required>
+    hx-swap="innerHTML"
+    class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
-    <div class="mt-3">
+    <h4 class="mb-4 text-lg font-semibold text-slate-800">Добавление оборудования</h4>
+
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Название оборудования</label>
         <input
             class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             type="text"
-            name="model"
-            placeholder="Модель">
+            name="name"
+            required>
     </div>
 
-    <div class="mt-3">
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Модель</label>
         <input
             class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             type="text"
-            name="serial_number"
-            placeholder="Серийный номер">
+            name="model">
     </div>
 
-    <div class="mt-3">
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Серийный номер</label>
         <input
             class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             type="text"
-            name="manufacturer"
-            placeholder="Производитель">
+            name="serial_number">
     </div>
 
-    <div class="mt-3">
-        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+    <div class="mb-4">
+        <label class="mb-1 block font-semibold text-slate-700">Производитель</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="manufacturer">
+    </div>
+
+    <div class="mt-4">
+        <button
+            type="submit"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
             Добавить оборудование
         </button>
     </div>

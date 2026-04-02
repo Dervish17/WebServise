@@ -1,1 +1,3 @@
-<p class="muted">Пользователь успешно создан.</p>
+{% from "_macros.html" import alert_box %}
+
+{{ alert_box("Пользователь успешно создан.", "success") }}

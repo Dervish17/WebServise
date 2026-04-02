@@ -13,44 +13,68 @@
     hx-on::after-request="if(event.detail.successful) this.reset()"
     class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
+    <h3 class="mb-4 text-lg font-semibold text-slate-800">Создание пользователя</h3>
+
     <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
         <div>
             <label class="mb-1 block font-semibold text-slate-700">Фамилия</label>
-            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="last_name">
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="text"
+                name="last_name">
         </div>
 
         <div>
             <label class="mb-1 block font-semibold text-slate-700">Имя</label>
-            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="first_name">
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="text"
+                name="first_name">
         </div>
 
         <div>
             <label class="mb-1 block font-semibold text-slate-700">Отчество</label>
-            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="middle_name">
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="text"
+                name="middle_name">
         </div>
 
         <div>
             <label class="mb-1 block font-semibold text-slate-700">Email</label>
-            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="email" name="email" required>
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="email"
+                name="email"
+                required>
         </div>
 
         <div>
             <label class="mb-1 block font-semibold text-slate-700">Пароль</label>
-            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="password" name="password" required>
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="password"
+                name="password"
+                required>
         </div>
 
         <div>
             <label class="mb-1 block font-semibold text-slate-700">Роль</label>
-            <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="role" required>
-                <option value="admin">admin</option>
-                <option value="manager">manager</option>
-                <option value="engineer">engineer</option>
+            <select
+                class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                name="role"
+                required>
+                <option value="admin">Администратор</option>
+                <option value="manager">Менеджер</option>
+                <option value="engineer">Инженер</option>
             </select>
         </div>
     </div>
 
     <div class="mt-4">
-        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+        <button
+            type="submit"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
             Создать пользователя
         </button>
     </div>

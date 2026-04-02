@@ -1,3 +1,5 @@
+{% from "_macros.html" import person_name %}
+
 <h3 class="mb-4 text-xl font-bold text-slate-800">Заявка #{{ order.id }}</h3>
 
 <div class="mb-4 flex flex-wrap gap-2">
@@ -81,8 +83,8 @@
     {% endif %}
 </p>
 
-<p class="mb-2"><strong>Создал:</strong> {{ order.creator.email if order.creator else "-" }}</p>
-<p class="mb-2"><strong>Исполнитель:</strong> {{ order.assignee.email if order.assignee else "-" }}</p>
+<p class="mb-2"><strong>Создал:</strong> {{ person_name(order.creator) }}</p>
+<p class="mb-2"><strong>Исполнитель:</strong> {{ person_name(order.assignee) }}</p>
 
 <form
     hx-post="/app/orders/{{ order.id }}/assign"
@@ -95,7 +97,7 @@
         {% for engineer in engineers %}
             <option value="{{ engineer.id }}"
                 {% if order.assigned_to == engineer.id %}selected{% endif %}>
-                {{ engineer.email }}
+                {{ person_name(engineer) }}
             </option>
         {% endfor %}
     </select>

@@ -1,35 +1,57 @@
-<h3 class="detail-title">Редактирование оборудования #{{ equipment.id }}</h3>
+<h3 class="mb-4 text-xl font-bold text-slate-800">Редактирование оборудования #{{ equipment.id }}</h3>
 
 <form
     hx-post="/app/equipment/{{ equipment.id }}/edit"
     hx-target="#equipment-detail"
     hx-swap="innerHTML">
 
-    <div class="detail-row">
-        <label><strong>Название</strong></label>
-        <input class="select full-width" type="text" name="name" value="{{ equipment.name or '' }}" required>
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Название</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="name"
+            value="{{ equipment.name or '' }}"
+            required>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Модель</strong></label>
-        <input class="select full-width" type="text" name="model" value="{{ equipment.model or '' }}">
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Модель</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="model"
+            value="{{ equipment.model or '' }}">
     </div>
 
-    <div class="detail-row">
-        <label><strong>Серийный номер</strong></label>
-        <input class="select full-width" type="text" name="serial_number" value="{{ equipment.serial_number or '' }}">
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Серийный номер</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="serial_number"
+            value="{{ equipment.serial_number or '' }}">
     </div>
 
-    <div class="detail-row">
-        <label><strong>Производитель</strong></label>
-        <input class="select full-width" type="text" name="manufacturer" value="{{ equipment.manufacturer or '' }}">
+    <div class="mb-4">
+        <label class="mb-1 block font-semibold text-slate-700">Производитель</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="manufacturer"
+            value="{{ equipment.manufacturer or '' }}">
     </div>
 
-    <div class="detail-actions">
-        <button type="submit" class="button button-blue">Сохранить</button>
+    <div class="flex flex-wrap gap-2">
+        <button
+            type="submit"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            Сохранить
+        </button>
+
         <button
             type="button"
-            class="button button-dark"
+            class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
             hx-get="/app/equipment/{{ equipment.id }}/detail"
             hx-target="#equipment-detail"
             hx-swap="innerHTML">

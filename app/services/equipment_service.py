@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.client import Client
 from app.models.equipment import Equipment
@@ -37,8 +37,24 @@ def create_equipment(
     return equipment
 
 
-def get_all_equipment(db: Session) -> list[type[Equipment]]:
-    return db.query(Equipment).order_by(Equipment.id.desc()).all()
+def get_all_equipment(db: Session, search: str | None = None):
+    query = (
+        db.query(Equipment)
+        .options(joinedload(Equipment.client))
+        .join(Equipment.client)
+        .order_by(Equipment.id.desc())
+    )
+
+    if search:
+        query = query.filter(
+            (Equipment.name.ilike(f"%{search}%")) |
+            (Equipment.model.ilike(f"%{search}%")) |
+            (Equipment.serial_number.ilike(f"%{search}%")) |
+            (Equipment.manufacturer.ilike(f"%{search}%")) |
+            (Client.name.ilike(f"%{search}%"))
+        )
+
+    return query.all()
 
 
 def get_equipment_by_id(db: Session, equipment_id: int) -> type[Equipment]:

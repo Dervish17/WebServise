@@ -1,45 +1,73 @@
-<h3 class="detail-title">Редактирование клиента #{{ client.id }}</h3>
+<h3 class="mb-4 text-xl font-bold text-slate-800">Редактирование клиента #{{ client.id }}</h3>
 
 <form
     hx-post="/app/clients/{{ client.id }}/edit"
     hx-target="#client-detail"
     hx-swap="innerHTML">
 
-    <div class="detail-row">
-        <label><strong>Название</strong></label>
-        <input class="select full-width" type="text" name="name" value="{{ client.name }}" required>
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Название</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="name"
+            value="{{ client.name }}"
+            required>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Контактное лицо</strong></label>
-        <input class="select full-width" type="text" name="contact_person" value="{{ client.contact_person or '' }}">
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Контактное лицо</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="contact_person"
+            value="{{ client.contact_person or '' }}">
     </div>
 
-    <div class="detail-row">
-        <label><strong>Телефон</strong></label>
-        <input class="select full-width" type="text" name="phone" value="{{ client.phone or '' }}">
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Телефон</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="phone"
+            value="{{ client.phone or '' }}">
     </div>
 
-    <div class="detail-row">
-        <label><strong>Email</strong></label>
-        <input class="select full-width" type="email" name="email" value="{{ client.email or '' }}">
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Email</label>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="email"
+            name="email"
+            value="{{ client.email or '' }}">
     </div>
 
-    <div class="detail-row">
-        <label><strong>Адрес</strong></label>
-        <textarea class="textarea full-width" name="address" rows="2">{{ client.address or '' }}</textarea>
+    <div class="mb-3">
+        <label class="mb-1 block font-semibold text-slate-700">Адрес</label>
+        <textarea
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            name="address"
+            rows="2">{{ client.address or '' }}</textarea>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Заметки</strong></label>
-        <textarea class="textarea full-width" name="notes" rows="3">{{ client.notes or '' }}</textarea>
+    <div class="mb-4">
+        <label class="mb-1 block font-semibold text-slate-700">Заметки</label>
+        <textarea
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            name="notes"
+            rows="3">{{ client.notes or '' }}</textarea>
     </div>
 
-    <div class="detail-actions">
-        <button type="submit" class="button button-blue">Сохранить</button>
+    <div class="flex flex-wrap gap-2">
+        <button
+            type="submit"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            Сохранить
+        </button>
+
         <button
             type="button"
-            class="button button-dark"
+            class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
             hx-get="/app/clients/{{ client.id }}/detail"
             hx-target="#client-detail"
             hx-swap="innerHTML">

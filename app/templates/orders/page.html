@@ -13,19 +13,31 @@
     hx-on::after-request="if(event.detail.successful) this.reset()"
     class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
+    <h3 class="mb-4 text-lg font-semibold text-slate-800">Создание заявки</h3>
+
     <div class="mb-4">
         <label class="mb-1 block font-semibold text-slate-700">Название заявки</label>
-        <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="title" required>
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="title"
+            required>
     </div>
 
     <div class="mb-4">
         <label class="mb-1 block font-semibold text-slate-700">Описание</label>
-        <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="description" rows="3"></textarea>
+        <textarea
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            name="description"
+            rows="3"></textarea>
     </div>
 
     <div class="mb-4">
         <label class="mb-1 block font-semibold text-slate-700">Оборудование</label>
-        <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="equipment_id" required>
+        <select
+            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            name="equipment_id"
+            required>
             <option value="">Выбери оборудование</option>
             {% for equipment in equipments %}
                 <option value="{{ equipment.id }}">
@@ -38,45 +50,71 @@
 
     <div class="mb-4">
         <label class="mb-1 block font-semibold text-slate-700">Стоимость</label>
-        <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="number" step="0.01" name="total_cost">
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="number"
+            step="0.01"
+            name="total_cost">
     </div>
 
-    <div class="mb-3">
-        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+    <div class="mt-4">
+        <button
+            type="submit"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
             Создать заявку
         </button>
     </div>
 
-    <div id="create-order-result"></div>
+    <div id="create-order-result" class="mt-3"></div>
 </form>
 
-<div class="mb-4 flex items-center gap-2">
-    <label for="status" class="font-semibold text-slate-700">Статус:</label>
-    <select
-        id="status"
-        name="status"
-        class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-        hx-get="/app/orders/table"
-        hx-target="#orders-table"
-        hx-swap="innerHTML">
-        <option value="">Все</option>
-        <option value="new">Новая</option>
-        <option value="in_progress">В работе</option>
-        <option value="done">Выполнена</option>
-    </select>
+<div class="mb-4 flex flex-wrap items-end gap-3">
+    <div>
+        <label for="status" class="mb-1 block font-semibold text-slate-700">Статус</label>
+        <select
+            id="status"
+            name="status"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/orders/table"
+            hx-target="#orders-table"
+            hx-swap="innerHTML"
+            hx-include="#order-search">
+            <option value="">Все</option>
+            <option value="new">Новая</option>
+            <option value="in_progress">В работе</option>
+            <option value="done">Выполнена</option>
+        </select>
+    </div>
+
+    <div class="min-w-[280px] flex-1">
+        <label for="order-search" class="mb-1 block font-semibold text-slate-700">Поиск по заявкам</label>
+        <input
+            id="order-search"
+            name="search"
+            type="text"
+            placeholder="Название, описание..."
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/orders/table"
+            hx-trigger="input changed delay:400ms"
+            hx-target="#orders-table"
+            hx-swap="innerHTML"
+            hx-include="#status">
+    </div>
 </div>
 
-<div class="flex items-start gap-5">
+<div class="flex items-start gap-5 h-[calc(100vh-160px)]">
     <div
         id="orders-table"
-        class="flex-[2]"
+        class="flex-[2] overflow-auto"
         hx-get="/app/orders/table"
         hx-trigger="load, refreshOrders from:body"
         hx-swap="innerHTML">
         Загрузка...
     </div>
 
-    <div id="order-detail" class="min-w-[320px] flex-1 rounded-xl bg-white p-4 shadow-sm">
+    <div
+        id="order-detail"
+        class="min-w-[320px] flex-1 overflow-y-auto rounded-xl bg-white p-4 shadow-sm h-full">
         Выбери заявку
     </div>
 </div>

@@ -1,0 +1,24 @@
+{% macro person_name(user) -%}
+    {%- if user -%}
+        {%- set name = [user.last_name, user.first_name, user.middle_name] | select | join(' ') -%}
+        {{- name if name else user.email -}}
+    {%- else -%}
+        -
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro alert_box(text, kind="success") -%}
+    {% if kind == "success" %}
+        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+            {{ text }}
+        </div>
+    {% elif kind == "error" %}
+        <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ text }}
+        </div>
+    {% else %}
+        <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            {{ text }}
+        </div>
+    {% endif %}
+{%- endmacro %}

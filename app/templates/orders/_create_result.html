@@ -1,11 +1,11 @@
-<p class="muted">
-    Заявка #{{ order.id }} успешно создана.
-</p>
+{% from "_macros.html" import alert_box %}
+
+{{ alert_box("Заявка #" ~ order.id ~ " успешно создана.", "success") }}
 
 <div
     hx-get="/app/orders/{{ order.id }}/detail"
     hx-trigger="load"
     hx-target="#order-detail"
     hx-swap="innerHTML"
-    style="display: none;">
+    class="hidden">
 </div>

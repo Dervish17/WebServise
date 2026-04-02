@@ -31,8 +31,20 @@ def create_client(
     return client
 
 
-def get_all_clients(db: Session) -> list[type[Client]]:
-    return db.query(Client).order_by(Client.id.desc()).all()
+def get_all_clients(db: Session, search: str | None = None):
+    query = db.query(Client).order_by(Client.id.desc())
+
+    if search:
+        query = query.filter(
+            (Client.name.ilike(f"%{search}%")) |
+            (Client.contact_person.ilike(f"%{search}%")) |
+            (Client.phone.ilike(f"%{search}%")) |
+            (Client.email.ilike(f"%{search}%")) |
+            (Client.address.ilike(f"%{search}%")) |
+            (Client.notes.ilike(f"%{search}%"))
+        )
+
+    return query.all()
 
 
 def get_client_by_id(db: Session, client_id: int) -> type[Client]:

@@ -4,18 +4,32 @@
 
 {% block content %}
 <h2 class="mb-4 text-2xl font-bold text-slate-800">Оборудование</h2>
-
-<div class="flex items-start gap-5">
+<div class="mb-4">
+    <label for="equipment-search" class="mb-1 block font-semibold text-slate-700">Поиск по оборудованию</label>
+    <input
+        id="equipment-search"
+        name="search"
+        type="text"
+        placeholder="Название, модель, серийный номер, производитель, клиент..."
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+        hx-get="/app/equipment/table"
+        hx-trigger="input changed delay:400ms"
+        hx-target="#equipment-table"
+        hx-swap="innerHTML">
+</div>
+<div class="flex items-start gap-5 h-[calc(100vh-160px)]">
     <div
         id="equipment-table"
-        class="flex-[2]"
+        class="flex-[2] overflow-auto"
         hx-get="/app/equipment/table"
         hx-trigger="load, refreshEquipment from:body"
         hx-swap="innerHTML">
         Загрузка...
     </div>
 
-    <div id="equipment-detail" class="min-w-[320px] flex-1 rounded-xl bg-white p-4 shadow-sm">
+    <div
+        id="equipment-detail"
+        class="min-w-[320px] flex-1 overflow-y-auto rounded-xl bg-white p-4 shadow-sm h-full">
         Выбери оборудование
     </div>
 </div>
