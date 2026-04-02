@@ -17,11 +17,11 @@ ALLOWED_TRANSITIONS = {
 
 
 def _create_order_log(
-        db: Session,
-        order_id: int,
-        action: str,
-        description: str,
-        user_id: int,
+    db: Session,
+    order_id: int,
+    action: str,
+    description: str,
+    user_id: int,
 ) -> OrderLog:
     log = OrderLog(
         order_id=order_id,
@@ -34,12 +34,12 @@ def _create_order_log(
 
 
 def create_order(
-        db: Session,
-        title: str,
-        description: str,
-        equipment_id: int,
-        current_user: User,
-        total_cost=None,
+    db: Session,
+    title: str,
+    description: str,
+    equipment_id: int,
+    current_user: User,
+    total_cost=None,
 ) -> Order:
     equipment = db.query(Equipment).filter(Equipment.id == equipment_id).first()
 
@@ -81,24 +81,21 @@ def create_order(
 
 
 def filter_orders(
-        db: Session,
-        status: str | None = None,
-        client_id: int | None = None,
-        assigned_to: int | None = None,
-        created_by: int | None = None,
-        search: str | None = None,
-        sort: str = "newest",
-        limit: int = 10,
-        offset: int = 0,
+    db: Session,
+    status: str | None = None,
+    client_id: int | None = None,
+    assigned_to: int | None = None,
+    created_by: int | None = None,
+    search: str | None = None,
+    sort: str = "newest",
+    limit: int = 10,
+    offset: int = 0,
 ) -> list[Order]:
-    query = (
-        db.query(Order)
-        .options(
-            joinedload(Order.client),
-            joinedload(Order.equipment),
-            joinedload(Order.creator),
-            joinedload(Order.assignee),
-        )
+    query = db.query(Order).options(
+        joinedload(Order.client),
+        joinedload(Order.equipment),
+        joinedload(Order.creator),
+        joinedload(Order.assignee),
     )
     query = query.join(Order.client).join(Order.equipment)
 
@@ -116,12 +113,12 @@ def filter_orders(
 
     if search:
         query = query.filter(
-            (Order.title.ilike(f"%{search}%")) |
-            (Order.description.ilike(f"%{search}%")) |
-            (Client.name.ilike(f"%{search}%")) |
-            (Equipment.name.ilike(f"%{search}%")) |
-            (Equipment.model.ilike(f"%{search}%")) |
-            (Equipment.serial_number.ilike(f"%{search}%"))
+            (Order.title.ilike(f"%{search}%"))
+            | (Order.description.ilike(f"%{search}%"))
+            | (Client.name.ilike(f"%{search}%"))
+            | (Equipment.name.ilike(f"%{search}%"))
+            | (Equipment.model.ilike(f"%{search}%"))
+            | (Equipment.serial_number.ilike(f"%{search}%"))
         )
 
     if sort == "oldest":
@@ -155,10 +152,10 @@ def get_order_by_id(db: Session, order_id: int) -> Order:
 
 
 def assign_order(
-        db: Session,
-        order_id: int,
-        user_id: int,
-        current_user: User,
+    db: Session,
+    order_id: int,
+    user_id: int,
+    current_user: User,
 ) -> Order:
     order = get_order_by_id(db, order_id)
 
@@ -208,10 +205,10 @@ def assign_order(
 
 
 def change_status(
-        db: Session,
-        order_id: int,
-        new_status: OrderStatus,
-        current_user: User,
+    db: Session,
+    order_id: int,
+    new_status: OrderStatus,
+    current_user: User,
 ) -> Order:
     order = get_order_by_id(db, order_id)
 
@@ -256,10 +253,10 @@ def change_status(
 
 
 def add_comment(
-        db: Session,
-        order_id: int,
-        text: str,
-        current_user: User,
+    db: Session,
+    order_id: int,
+    text: str,
+    current_user: User,
 ) -> OrderLog:
     order = get_order_by_id(db, order_id)
 
@@ -278,11 +275,11 @@ def add_comment(
 
 
 def update_order(
-        db: Session,
-        order_id: int,
-        title: str,
-        description: str | None = None,
-        total_cost=None,
+    db: Session,
+    order_id: int,
+    title: str,
+    description: str | None = None,
+    total_cost=None,
 ) -> Order:
     order = get_order_by_id(db, order_id)
 
