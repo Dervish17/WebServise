@@ -1,5 +1,5 @@
-<div class="card">
-    <h3 class="detail-title">Редактирование пользователя #{{ user.id }}</h3>
+<div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <h3 class="mb-4 text-xl font-bold text-slate-800">Редактирование пользователя #{{ user.id }}</h3>
 
     <form
         hx-post="/app/users/{{ user.id }}/edit"
@@ -7,37 +7,39 @@
         hx-swap="innerHTML"
         hx-on::after-request="if(event.detail.successful) document.getElementById('user-edit-modal').innerHTML = ''">
 
-        <div class="detail-row">
-            <label><strong>Фамилия</strong></label>
-            <input class="select full-width" type="text" name="last_name" value="{{ user.last_name or '' }}">
+        <div class="mb-3">
+            <label class="mb-1 block font-semibold text-slate-700">Фамилия</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="last_name" value="{{ user.last_name or '' }}">
         </div>
 
-        <div class="detail-row">
-            <label><strong>Имя</strong></label>
-            <input class="select full-width" type="text" name="first_name" value="{{ user.first_name or '' }}">
+        <div class="mb-3">
+            <label class="mb-1 block font-semibold text-slate-700">Имя</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="first_name" value="{{ user.first_name or '' }}">
         </div>
 
-        <div class="detail-row">
-            <label><strong>Отчество</strong></label>
-            <input class="select full-width" type="text" name="middle_name" value="{{ user.middle_name or '' }}">
+        <div class="mb-3">
+            <label class="mb-1 block font-semibold text-slate-700">Отчество</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="middle_name" value="{{ user.middle_name or '' }}">
         </div>
 
-        <div class="detail-row">
-            <label><strong>Email</strong></label>
-            <input class="select full-width" type="email" name="email" value="{{ user.email }}" required>
+        <div class="mb-3">
+            <label class="mb-1 block font-semibold text-slate-700">Email</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="email" name="email" value="{{ user.email }}" required>
         </div>
 
-        <div class="detail-row">
-            <label><strong>Роль</strong></label>
-            <select class="select full-width" name="role" required>
-                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>Администратор</option>
-                <option value="manager" {% if user.role == "manager" %}selected{% endif %}>Менеджер</option>
-                <option value="engineer" {% if user.role == "engineer" %}selected{% endif %}>Инженер</option>
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-slate-700">Роль</label>
+            <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="role" required>
+                <option value="admin" {% if user.role == "admin" %}selected{% endif %}>admin</option>
+                <option value="manager" {% if user.role == "manager" %}selected{% endif %}>manager</option>
+                <option value="engineer" {% if user.role == "engineer" %}selected{% endif %}>engineer</option>
             </select>
         </div>
 
-        <div class="detail-actions">
-            <button type="submit" class="button button-blue">Сохранить</button>
+        <div class="flex flex-wrap gap-2">
+            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+                Сохранить
+            </button>
         </div>
     </form>
 </div>

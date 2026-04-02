@@ -3,19 +3,19 @@
 {% block title %}Оборудование{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Оборудование</h2>
+<h2 class="mb-4 text-2xl font-bold text-slate-800">Оборудование</h2>
 
-<div class="layout">
+<div class="flex items-start gap-5">
     <div
         id="equipment-table"
-        class="orders-table-wrap"
+        class="flex-[2]"
         hx-get="/app/equipment/table"
         hx-trigger="load, refreshEquipment from:body"
         hx-swap="innerHTML">
         Загрузка...
     </div>
 
-    <div id="equipment-detail" class="order-detail-wrap">
+    <div id="equipment-detail" class="min-w-[320px] flex-1 rounded-xl bg-white p-4 shadow-sm">
         Выбери оборудование
     </div>
 </div>

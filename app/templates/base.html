@@ -5,49 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Профсервис{% endblock %}</title>
     <script src="https://unpkg.com/htmx.org@2.0.7"></script>
+    <link rel="stylesheet" href="/static/css/tailwind-build.css">
     <link rel="stylesheet" href="/static/css/app.css">
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800">
 
-    <header class="topbar">
-        <div class="topbar-inner">
-            <h1 class="topbar-title">Профсервис</h1>
+    <header class="bg-slate-800 text-white">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <h1 class="text-2xl font-bold">Профсервис</h1>
 
-            <div style="display: flex; align-items: center; gap: 18px;">
-                <nav style="display: flex; gap: 14px;">
-                    <a href="/app/orders" class="topbar-link">Заявки</a>
-                    <a href="/app/clients" class="topbar-link">Клиенты</a>
-                    <a href="/app/equipment" class="topbar-link">Оборудование</a>
-                    <a href="/app/users" class="topbar-link">Пользователи</a>
+            <div class="flex items-center gap-5">
+                <nav class="flex gap-4">
+                    <a href="/app/orders" class="font-semibold text-white no-underline hover:text-slate-200">Заявки</a>
+                    <a href="/app/clients" class="font-semibold text-white no-underline hover:text-slate-200">Клиенты</a>
+                    <a href="/app/equipment" class="font-semibold text-white no-underline hover:text-slate-200">Оборудование</a>
+                    <a href="/app/users" class="font-semibold text-white no-underline hover:text-slate-200">Пользователи</a>
                 </nav>
 
                 {% if request.state.current_user %}
-                    <div style="color: white; font-size: 14px; text-align: right;">
+                    <div class="text-right text-sm text-white">
                         <div>
                             {{ request.state.current_user.last_name or "" }}
                             {{ request.state.current_user.first_name or "" }}
                             {{ request.state.current_user.middle_name or "" }}
                         </div>
-                        <div style="opacity: 0.8;">
-                            {% if request.state.current_user.role == "admin" %}
-                                Администратор
-                            {% elif request.state.current_user.role == "manager" %}
-                                Менеджер
-                            {% elif request.state.current_user.role == "engineer" %}
-                                Инженер
-                            {% else %}
-                                {{ request.state.current_user.role }}
-                            {% endif %}
+                        <div class="opacity-80">
+                            {{ request.state.current_user.role }}
                         </div>
                     </div>
 
-                    <a href="/app/logout" class="topbar-link">Выход</a>
+                    <a href="/app/logout" class="font-semibold text-white no-underline hover:text-slate-200">Выход</a>
                 {% endif %}
             </div>
         </div>
     </header>
 
-    <main class="page">
+    <main class="mx-auto max-w-7xl px-4 py-6">
         {% block content %}{% endblock %}
     </main>
 

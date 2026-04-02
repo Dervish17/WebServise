@@ -1,64 +1,79 @@
-<table class="orders-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Статус</th>
-            <th>Клиент</th>
-            <th>Оборудование</th>
-            <th>Инженер</th>
-            <th>Стоимость</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for order in orders %}
-        <tr
-            class="orders-row{% if loop.first %} active{% endif %}"
-            hx-get="/app/orders/{{ order.id }}/detail"
-            hx-target="#order-detail"
-            hx-swap="innerHTML"
-            onclick="
-                document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
-                this.classList.add('active');
-            ">
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Название</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Статус</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Клиент</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Оборудование</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Инженер</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Стоимость</th>
+            </tr>
+        </thead>
 
-            <td>{{ order.id }}</td>
+        <tbody class="divide-y divide-slate-100">
+        {% for order in orders %}
+            <tr
+                class="orders-row cursor-pointer transition hover:bg-slate-50{% if loop.first %} active{% endif %}"
+                hx-get="/app/orders/{{ order.id }}/detail"
+                hx-target="#order-detail"
+                hx-swap="innerHTML"
+                onclick="
+                    document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
+                    this.classList.add('active');
+                ">
+                <td class="px-4 py-3 text-sm text-slate-700">{{ order.id }}</td>
 
-            <td>{{ order.title }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-800">
+                    {{ order.title }}
+                </td>
 
-            <td>
-                {% if order.status == "new" %}
-                    <span class="badge badge-new">Новая</span>
-                {% elif order.status == "in_progress" %}
-                    <span class="badge badge-progress">В работе</span>
-                {% elif order.status == "done" %}
-                    <span class="badge badge-done">Выполнена</span>
-                {% else %}
-                    <span>{{ order.status }}</span>
-                {% endif %}
-            </td>
+                <td class="px-4 py-3 text-sm">
+                    {% if order.status == "new" %}
+                        <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
+                    {% elif order.status == "in_progress" %}
+                        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
+                    {% elif order.status == "done" %}
+                        <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
+                    {% else %}
+                        <span>{{ order.status }}</span>
+                    {% endif %}
+                </td>
 
-            <td>{{ order.client.name if order.client else "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">
+                    {{ order.client.name if order.client else "-" }}
+                </td>
 
-            <td>{{ order.equipment.name if order.equipment else "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">
+                    {{ order.equipment.name if order.equipment else "-" }}
+                </td>
 
-            <td>{{ order.assignee.email if order.assignee else "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">
+                    {{ order.assignee.email if order.assignee else "-" }}
+                </td>
 
-            <td>{{ order.total_cost if order.total_cost is not none else "-" }}</td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="7" class="empty-cell">Заявок нет</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+                <td class="px-4 py-3 text-sm text-slate-700">
+                    {{ order.total_cost if order.total_cost is not none else "-" }}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="7" class="px-4 py-6 text-center text-sm text-slate-500">
+                    Заявок нет
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 {% if orders %}
     <div
         hx-get="/app/orders/{{ orders[0].id }}/detail"
         hx-trigger="load"
         hx-target="#order-detail"
         hx-swap="innerHTML"
-        style="display: none;">
+        class="hidden">
     </div>
 {% endif %}

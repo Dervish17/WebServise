@@ -3,7 +3,7 @@
 {% block title %}Заявки{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Список заявок</h2>
+<h2 class="mb-4 text-2xl font-bold text-slate-800">Список заявок</h2>
 
 <form
     id="create-order-form"
@@ -11,22 +11,21 @@
     hx-target="#create-order-result"
     hx-swap="innerHTML"
     hx-on::after-request="if(event.detail.successful) this.reset()"
-    class="card"
-    style="margin-bottom: 20px;">
+    class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
-    <div class="detail-row">
-        <label><strong>Название заявки</strong></label>
-        <input class="select full-width" type="text" name="title" required>
+    <div class="mb-4">
+        <label class="mb-1 block font-semibold text-slate-700">Название заявки</label>
+        <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="title" required>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Описание</strong></label>
-        <textarea class="textarea full-width" name="description" rows="3"></textarea>
+    <div class="mb-4">
+        <label class="mb-1 block font-semibold text-slate-700">Описание</label>
+        <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="description" rows="3"></textarea>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Оборудование</strong></label>
-        <select class="select full-width" name="equipment_id" required>
+    <div class="mb-4">
+        <label class="mb-1 block font-semibold text-slate-700">Оборудование</label>
+        <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="equipment_id" required>
             <option value="">Выбери оборудование</option>
             {% for equipment in equipments %}
                 <option value="{{ equipment.id }}">
@@ -37,24 +36,26 @@
         </select>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Стоимость</strong></label>
-        <input class="select full-width" type="number" step="0.01" name="total_cost">
+    <div class="mb-4">
+        <label class="mb-1 block font-semibold text-slate-700">Стоимость</label>
+        <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="number" step="0.01" name="total_cost">
     </div>
 
-    <div class="detail-actions">
-        <button type="submit" class="button button-blue">Создать заявку</button>
+    <div class="mb-3">
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            Создать заявку
+        </button>
     </div>
 
     <div id="create-order-result"></div>
 </form>
 
-<div class="filter-bar">
-    <label for="status" class="filter-label">Статус:</label>
+<div class="mb-4 flex items-center gap-2">
+    <label for="status" class="font-semibold text-slate-700">Статус:</label>
     <select
         id="status"
         name="status"
-        class="select"
+        class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
         hx-get="/app/orders/table"
         hx-target="#orders-table"
         hx-swap="innerHTML">
@@ -65,17 +66,17 @@
     </select>
 </div>
 
-<div class="layout">
+<div class="flex items-start gap-5">
     <div
         id="orders-table"
-        class="orders-table-wrap"
+        class="flex-[2]"
         hx-get="/app/orders/table"
         hx-trigger="load, refreshOrders from:body"
         hx-swap="innerHTML">
         Загрузка...
     </div>
 
-    <div id="order-detail" class="order-detail-wrap">
+    <div id="order-detail" class="min-w-[320px] flex-1 rounded-xl bg-white p-4 shadow-sm">
         Выбери заявку
     </div>
 </div>

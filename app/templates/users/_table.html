@@ -1,88 +1,93 @@
-<table class="orders-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Фамилия</th>
-            <th>Имя</th>
-            <th>Отчество</th>
-            <th>Email</th>
-            <th>Роль</th>
-            <th>Статус</th>
-            <th>Действия</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for user in users %}
-        <tr class="orders-row{% if not user.is_active %} user-inactive{% endif %}">
-            <td>{{ user.id }}</td>
-            <td>{{ user.last_name or "-" }}</td>
-            <td>{{ user.first_name or "-" }}</td>
-            <td>{{ user.middle_name or "-" }}</td>
-            <td>{{ user.email }}</td>
-            <td>
-                {% if user.role == "admin" %}
-                    Администратор
-                {% elif user.role == "manager" %}
-                    Менеджер
-                {% elif user.role == "engineer" %}
-                    Инженер
-                {% else %}
-                    {{ user.role }}
-                {% endif %}
-            </td>
-            <td>
-                {% if user.is_active %}
-                    <span class="badge badge-done">Активен</span>
-                {% else %}
-                    <span class="badge" style="background: #fee2e2; color: #b91c1c;">Неактивен</span>
-                {% endif %}
-            </td>
-            <td>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button
-                        class="button button-dark"
-                        hx-get="/app/users/{{ user.id }}/edit"
-                        hx-target="#user-edit-modal"
-                        hx-swap="innerHTML">
-                        Редактировать
-                    </button>
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Фамилия</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Имя</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Отчество</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Email</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Роль</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Статус</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Действия</th>
+            </tr>
+        </thead>
 
-                    {% if user.is_active %}
-                        <button
-                            class="button"
-                            style="background: #b45309;"
-                            hx-post="/app/users/{{ user.id }}/toggle-active"
-                            hx-target="#user-edit-modal"
-                            hx-swap="innerHTML">
-                            Деактивировать
-                        </button>
+        <tbody class="divide-y divide-slate-100">
+        {% for user in users %}
+            <tr class="{% if not user.is_active %}bg-slate-50 opacity-70{% else %}bg-white{% endif %}">
+                <td class="px-4 py-3 text-sm text-slate-700">{{ user.id }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ user.last_name or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ user.first_name or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ user.middle_name or "-" }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-800">{{ user.email }}</td>
+
+                <td class="px-4 py-3 text-sm text-slate-700">
+                    {% if user.role == "admin" %}
+                        Администратор
+                    {% elif user.role == "manager" %}
+                        Менеджер
+                    {% elif user.role == "engineer" %}
+                        Инженер
                     {% else %}
+                        {{ user.role }}
+                    {% endif %}
+                </td>
+
+                <td class="px-4 py-3 text-sm">
+                    {% if user.is_active %}
+                        <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Активен</span>
+                    {% else %}
+                        <span class="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">Неактивен</span>
+                    {% endif %}
+                </td>
+
+                <td class="px-4 py-3 text-sm">
+                    <div class="flex flex-wrap gap-2">
                         <button
-                            class="button"
-                            style="background: #15803d;"
-                            hx-post="/app/users/{{ user.id }}/toggle-active"
+                            class="rounded-lg bg-slate-700 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
+                            hx-get="/app/users/{{ user.id }}/edit"
                             hx-target="#user-edit-modal"
                             hx-swap="innerHTML">
-                            Активировать
+                            Редактировать
                         </button>
-                    {% endif %}
 
-                    <button
-                        class="button"
-                        style="background: #dc2626;"
-                        hx-delete="/app/users/{{ user.id }}"
-                        hx-confirm="Удалить пользователя?"
-                        hx-target="#user-edit-modal"
-                        hx-swap="innerHTML">
-                        Удалить
-                    </button>
-                </div>
-            </td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="8" class="empty-cell">Пользователей нет</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+                        {% if user.is_active %}
+                            <button
+                                class="rounded-lg bg-amber-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-amber-700"
+                                hx-post="/app/users/{{ user.id }}/toggle-active"
+                                hx-target="#user-edit-modal"
+                                hx-swap="innerHTML">
+                                Деактивировать
+                            </button>
+                        {% else %}
+                            <button
+                                class="rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+                                hx-post="/app/users/{{ user.id }}/toggle-active"
+                                hx-target="#user-edit-modal"
+                                hx-swap="innerHTML">
+                                Активировать
+                            </button>
+                        {% endif %}
+
+                        <button
+                            class="rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                            hx-delete="/app/users/{{ user.id }}"
+                            hx-confirm="Удалить пользователя?"
+                            hx-target="#user-edit-modal"
+                            hx-swap="innerHTML">
+                            Удалить
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8" class="px-4 py-6 text-center text-sm text-slate-500">
+                    Пользователей нет
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -3,24 +3,24 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<div style="max-width: 420px; margin: 40px auto;">
-    <div class="order-detail-wrap">
-        <h2 class="page-title">Вход в систему</h2>
+<div class="mx-auto mt-10 max-w-md">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="mb-5 text-2xl font-bold text-slate-800">Вход в систему</h2>
 
         <form method="post" action="/app/login">
-            <div class="detail-row">
-                <label><strong>Email</strong></label>
-                <input class="select full-width" type="email" name="email" required>
+            <div class="mb-4">
+                <label class="mb-1 block font-semibold text-slate-700">Email</label>
+                <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="email" name="email" required>
             </div>
 
-            <div class="detail-row">
-                <label><strong>Пароль</strong></label>
-                <input class="select full-width" type="password" name="password" required>
+            <div class="mb-5">
+                <label class="mb-1 block font-semibold text-slate-700">Пароль</label>
+                <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="password" name="password" required>
             </div>
 
-            <div class="detail-actions">
-                <button type="submit" class="button button-blue">Войти</button>
-            </div>
+            <button type="submit" class="w-full rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+                Войти
+            </button>
         </form>
     </div>
 </div>

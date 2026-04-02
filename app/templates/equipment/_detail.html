@@ -1,15 +1,16 @@
-<h3 class="detail-title">Оборудование #{{ equipment.id }}</h3>
-<div class="detail-actions">
+<h3 class="mb-4 text-xl font-bold text-slate-800">Оборудование #{{ equipment.id }}</h3>
+
+<div class="mb-4 flex flex-wrap gap-2">
     <button
-        class="button button-dark"
+        class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
         hx-get="/app/equipment/{{ equipment.id }}/edit"
         hx-target="#equipment-detail"
         hx-swap="innerHTML">
         Редактировать
     </button>
+
     <button
-        class="button"
-        style="background: #dc2626;"
+        class="rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
         hx-delete="/app/equipment/{{ equipment.id }}{% if standalone %}?redirect_to_list=1{% endif %}"
         hx-confirm="Удалить оборудование?"
         hx-target="#equipment-detail"
@@ -18,37 +19,48 @@
     </button>
 </div>
 
-<p class="detail-row"><strong>Название:</strong> {{ equipment.name or "-" }}</p>
-<p class="detail-row"><strong>Модель:</strong> {{ equipment.model or "-" }}</p>
-<p class="detail-row"><strong>Серийный номер:</strong> {{ equipment.serial_number or "-" }}</p>
-<p class="detail-row"><strong>Производитель:</strong> {{ equipment.manufacturer or "-" }}</p>
-<p class="detail-row"><strong>Клиент:</strong> {{ equipment.client.name if equipment.client else "-" }}</p>
+<p class="mb-2"><strong>Название:</strong> {{ equipment.name or "-" }}</p>
+<p class="mb-2"><strong>Модель:</strong> {{ equipment.model or "-" }}</p>
+<p class="mb-2"><strong>Серийный номер:</strong> {{ equipment.serial_number or "-" }}</p>
+<p class="mb-2"><strong>Производитель:</strong> {{ equipment.manufacturer or "-" }}</p>
+<p class="mb-4">
+    <strong>Клиент:</strong>
+    {% if equipment.client %}
+        <a href="/app/clients/{{ equipment.client_id }}/page" class="font-semibold text-blue-600 hover:text-blue-700">
+            {{ equipment.client.name }}
+        </a>
+    {% else %}
+        -
+    {% endif %}
+</p>
 
-<hr class="separator">
+<hr class="my-5 border-t border-slate-200">
 
-<h4>Заявки по этому оборудованию</h4>
+<h4 class="mb-3 text-lg font-semibold">Заявки по этому оборудованию</h4>
 
 {% for order in orders %}
     <a
         href="/app/orders/{{ order.id }}/page"
-        style="text-decoration: none; color: inherit; display: block;">
-        <div class="card card-soft" style="cursor: pointer;">
-        <div class="card-title">Заявка #{{ order.id }} — {{ order.title }}</div>
-        <div>
-            Статус:
-            {% if order.status == "new" %}
-                <span class="badge badge-new">Новая</span>
-            {% elif order.status == "in_progress" %}
-                <span class="badge badge-progress">В работе</span>
-            {% elif order.status == "done" %}
-                <span class="badge badge-done">Выполнена</span>
-            {% else %}
-                {{ order.status }}
-            {% endif %}
+        class="block no-underline text-inherit">
+        <div class="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:bg-slate-100">
+            <div class="mb-2 font-semibold text-slate-800">Заявка #{{ order.id }} — {{ order.title }}</div>
+
+            <div class="mb-2 text-sm text-slate-700">
+                Статус:
+                {% if order.status == "new" %}
+                    <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
+                {% elif order.status == "in_progress" %}
+                    <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
+                {% elif order.status == "done" %}
+                    <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
+                {% else %}
+                    {{ order.status }}
+                {% endif %}
+            </div>
+
+            <div class="text-sm text-slate-700">Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
         </div>
-        <div>Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
-    </div>
     </a>
 {% else %}
-    <p class="muted">По этому оборудованию заявок пока нет.</p>
+    <p class="text-slate-500">По этому оборудованию заявок пока нет.</p>
 {% endfor %}

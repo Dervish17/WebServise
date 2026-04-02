@@ -1,39 +1,44 @@
-<table class="orders-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Модель</th>
-            <th>Серийный номер</th>
-            <th>Производитель</th>
-            <th>Клиент</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for equipment in equipments %}
-        <tr
-            class="orders-row{% if loop.first %} active{% endif %}"
-            hx-get="/app/equipment/{{ equipment.id }}/detail"
-            hx-target="#equipment-detail"
-            hx-swap="innerHTML"
-            onclick="
-                document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
-                this.classList.add('active');
-            ">
-            <td>{{ equipment.id }}</td>
-            <td>{{ equipment.name or "-" }}</td>
-            <td>{{ equipment.model or "-" }}</td>
-            <td>{{ equipment.serial_number or "-" }}</td>
-            <td>{{ equipment.manufacturer or "-" }}</td>
-            <td>{{ equipment.client.name if equipment.client else "-" }}</td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="6" class="empty-cell">Оборудования нет</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Название</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Модель</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Серийный номер</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Производитель</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Клиент</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+        {% for equipment in equipments %}
+            <tr
+                class="orders-row cursor-pointer transition hover:bg-slate-50{% if loop.first %} active{% endif %}"
+                hx-get="/app/equipment/{{ equipment.id }}/detail"
+                hx-target="#equipment-detail"
+                hx-swap="innerHTML"
+                onclick="
+                    document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
+                    this.classList.add('active');
+                ">
+                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.id }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-800">{{ equipment.name or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.model or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.serial_number or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.manufacturer or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ equipment.client.name if equipment.client else "-" }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" class="px-4 py-6 text-center text-sm text-slate-500">
+                    Оборудования нет
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% if equipments %}
     <div
@@ -41,6 +46,6 @@
         hx-trigger="load"
         hx-target="#equipment-detail"
         hx-swap="innerHTML"
-        style="display: none;">
+        class="hidden">
     </div>
 {% endif %}

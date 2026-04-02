@@ -3,23 +3,22 @@
 {% block title %}Оборудование #{{ equipment.id }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 760px; margin: 0 auto;">
-
-    <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+<div class="mx-auto max-w-3xl">
+    <div class="mb-4 flex flex-wrap gap-3">
         <a
             href="/app/equipment"
-            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            class="font-semibold text-blue-600 hover:text-blue-700">
             ← Назад к оборудованию
         </a>
 
         <a
             href="/app/clients/{{ equipment.client_id }}/page"
-            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            class="font-semibold text-blue-600 hover:text-blue-700">
             ← К клиенту
         </a>
     </div>
 
-    <div id="equipment-detail" class="order-detail-wrap">
+    <div id="equipment-detail" class="rounded-xl bg-white p-5 shadow-sm">
         {% set standalone = True %}
         {% include "equipment/_detail.html" %}
     </div>

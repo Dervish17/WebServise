@@ -1,37 +1,42 @@
-<table class="orders-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Название</th>
-            <th>Контактное лицо</th>
-            <th>Телефон</th>
-            <th>Email</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for client in clients %}
-        <tr
-            class="orders-row{% if loop.first %} active{% endif %}"
-            hx-get="/app/clients/{{ client.id }}/detail"
-            hx-target="#client-detail"
-            hx-swap="innerHTML"
-            onclick="
-                document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
-                this.classList.add('active');
-            ">
-            <td>{{ client.id }}</td>
-            <td>{{ client.name }}</td>
-            <td>{{ client.contact_person or "-" }}</td>
-            <td>{{ client.phone or "-" }}</td>
-            <td>{{ client.email or "-" }}</td>
-        </tr>
-    {% else %}
-        <tr>
-            <td colspan="5" class="empty-cell">Клиентов нет</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Название</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Контактное лицо</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Телефон</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Email</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+        {% for client in clients %}
+            <tr
+                class="orders-row cursor-pointer transition hover:bg-slate-50{% if loop.first %} active{% endif %}"
+                hx-get="/app/clients/{{ client.id }}/detail"
+                hx-target="#client-detail"
+                hx-swap="innerHTML"
+                onclick="
+                    document.querySelectorAll('.orders-row').forEach(row => row.classList.remove('active'));
+                    this.classList.add('active');
+                ">
+                <td class="px-4 py-3 text-sm text-slate-700">{{ client.id }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-slate-800">{{ client.name }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ client.contact_person or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ client.phone or "-" }}</td>
+                <td class="px-4 py-3 text-sm text-slate-700">{{ client.email or "-" }}</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" class="px-4 py-6 text-center text-sm text-slate-500">
+                    Клиентов нет
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% if clients %}
     <div
@@ -39,6 +44,6 @@
         hx-trigger="load"
         hx-target="#client-detail"
         hx-swap="innerHTML"
-        style="display: none;">
+        class="hidden">
     </div>
 {% endif %}

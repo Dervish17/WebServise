@@ -1,15 +1,16 @@
-<h3 class="detail-title">Заявка #{{ order.id }}</h3>
-<div class="detail-actions">
+<h3 class="mb-4 text-xl font-bold text-slate-800">Заявка #{{ order.id }}</h3>
+
+<div class="mb-4 flex flex-wrap gap-2">
     <button
-        class="button button-dark"
+        class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
         hx-get="/app/orders/{{ order.id }}/edit"
         hx-target="#order-detail"
         hx-swap="innerHTML">
         Редактировать
     </button>
+
     <button
-        class="button"
-        style="background: #dc2626;"
+        class="rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
         hx-delete="/app/orders/{{ order.id }}{% if standalone %}?redirect_to_list=1{% endif %}"
         hx-confirm="Удалить заявку?"
         hx-target="#order-detail"
@@ -17,26 +18,27 @@
         Удалить
     </button>
 </div>
-<p class="detail-row"><strong>Название:</strong> {{ order.title }}</p>
-<p class="detail-row"><strong>Описание:</strong> {{ order.description }}</p>
 
-<p class="detail-row">
+<p class="mb-2"><strong>Название:</strong> {{ order.title }}</p>
+<p class="mb-2"><strong>Описание:</strong> {{ order.description }}</p>
+
+<p class="mb-3 flex items-center gap-2">
     <strong>Статус:</strong>
     {% if order.status == "new" %}
-        <span class="badge badge-new">Новая</span>
+        <span class="rounded-full bg-blue-100 px-2 py-1 text-sm text-blue-700">Новая</span>
     {% elif order.status == "in_progress" %}
-        <span class="badge badge-progress">В работе</span>
+        <span class="rounded-full bg-amber-100 px-2 py-1 text-sm text-amber-700">В работе</span>
     {% elif order.status == "done" %}
-        <span class="badge badge-done">Выполнена</span>
+        <span class="rounded-full bg-green-100 px-2 py-1 text-sm text-green-700">Выполнена</span>
     {% else %}
         <span>{{ order.status }}</span>
     {% endif %}
 </p>
 
-<div class="detail-actions">
+<div class="mb-4">
     {% if order.status == "new" %}
         <button
-            class="button button-blue"
+            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
             hx-post="/app/orders/{{ order.id }}/status"
             hx-vals='{"new_status":"in_progress"}'
             hx-target="#order-detail"
@@ -45,7 +47,7 @@
         </button>
     {% elif order.status == "in_progress" %}
         <button
-            class="button button-green"
+            class="rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition hover:bg-green-700"
             hx-post="/app/orders/{{ order.id }}/status"
             hx-vals='{"new_status":"done"}'
             hx-target="#order-detail"
@@ -53,43 +55,43 @@
             Завершить
         </button>
     {% elif order.status == "done" %}
-        <span class="muted">Заявка завершена</span>
+        <span class="text-slate-500">Заявка завершена</span>
     {% endif %}
 </div>
 
-<p class="detail-row">
+<p class="mb-2">
     <strong>Клиент:</strong>
     {% if order.client %}
-        <a
-            href="/app/clients/{{ order.client.id }}/page"
-            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+        <a href="/app/clients/{{ order.client.id }}/page" class="font-semibold text-blue-600 hover:text-blue-700">
             {{ order.client.name }}
         </a>
     {% else %}
         -
     {% endif %}
 </p>
-<p class="detail-row">
+
+<p class="mb-2">
     <strong>Оборудование:</strong>
     {% if order.equipment %}
-        <a
-            href="/app/equipment/{{ order.equipment.id }}/page"
-            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+        <a href="/app/equipment/{{ order.equipment.id }}/page" class="font-semibold text-blue-600 hover:text-blue-700">
             {{ order.equipment.name }}
         </a>
     {% else %}
         -
     {% endif %}
 </p>
-<p class="detail-row"><strong>Создал:</strong> {{ order.creator.email if order.creator else "-" }}</p>
-<p class="detail-row"><strong>Исполнитель:</strong> {{ order.assignee.email if order.assignee else "-" }}</p>
+
+<p class="mb-2"><strong>Создал:</strong> {{ order.creator.email if order.creator else "-" }}</p>
+<p class="mb-2"><strong>Исполнитель:</strong> {{ order.assignee.email if order.assignee else "-" }}</p>
 
 <form
     hx-post="/app/orders/{{ order.id }}/assign"
     hx-target="#order-detail"
     hx-swap="innerHTML"
-    class="form-block">
-    <select name="user_id" class="select full-width">
+    class="my-4">
+    <select
+        name="user_id"
+        class="mb-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100">
         {% for engineer in engineers %}
             <option value="{{ engineer.id }}"
                 {% if order.assigned_to == engineer.id %}selected{% endif %}>
@@ -97,16 +99,18 @@
             </option>
         {% endfor %}
     </select>
-    <div class="mt-8">
-        <button type="submit" class="button button-dark">Назначить инженера</button>
-    </div>
+    <button
+        type="submit"
+        class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800">
+        Назначить инженера
+    </button>
 </form>
 
-<p class="detail-row"><strong>Стоимость:</strong> {{ order.total_cost if order.total_cost is not none else "-" }}</p>
+<p class="mb-4"><strong>Стоимость:</strong> {{ order.total_cost if order.total_cost is not none else "-" }}</p>
 
-<hr class="separator">
+<hr class="my-5 border-t border-slate-200">
 
-<h4>Добавить комментарий</h4>
+<h4 class="mb-3 text-lg font-semibold">Добавить комментарий</h4>
 
 <form
     hx-post="/app/orders/{{ order.id }}/comment"
@@ -115,34 +119,36 @@
     <textarea
         name="text"
         rows="4"
-        class="textarea full-width"></textarea>
-    <div class="mt-8">
-        <button type="submit" class="button button-blue">Добавить</button>
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"></textarea>
+    <div class="mt-2">
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            Добавить
+        </button>
     </div>
 </form>
 
-<hr class="separator">
+<hr class="my-5 border-t border-slate-200">
 
-<h4>Комментарии</h4>
+<h4 class="mb-3 text-lg font-semibold">Комментарии</h4>
 
 {% for comment in comments %}
-    <div class="card card-soft">
+    <div class="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
         <div>{{ comment.description }}</div>
-        <div class="card-time">
+        <div class="mt-1 text-xs text-slate-500">
             {{ comment.created_at.strftime("%d.%m.%Y %H:%M") if comment.created_at else "-" }}
         </div>
     </div>
 {% else %}
-    <p class="muted">Комментариев пока нет.</p>
+    <p class="text-slate-500">Комментариев пока нет.</p>
 {% endfor %}
 
-<hr class="separator">
+<hr class="my-5 border-t border-slate-200">
 
-<h4>История действий</h4>
+<h4 class="mb-3 text-lg font-semibold">История действий</h4>
 
 {% for log in logs %}
-    <div class="card">
-        <div class="card-title">
+    <div class="mb-3 rounded-xl border border-slate-200 bg-white p-3">
+        <div class="mb-1 font-semibold">
             {% if log.action == "create" %}
                 Создание заявки
             {% elif log.action == "assign" %}
@@ -154,10 +160,10 @@
             {% endif %}
         </div>
         <div>{{ log.description }}</div>
-        <div class="card-time">
+        <div class="mt-1 text-xs text-slate-500">
             {{ log.created_at.strftime("%d.%m.%Y %H:%M") if log.created_at else "-" }}
         </div>
     </div>
 {% else %}
-    <p class="muted">История пока пуста.</p>
+    <p class="text-slate-500">История пока пуста.</p>
 {% endfor %}

@@ -3,45 +3,64 @@
 {% block title %}Клиенты{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Клиенты</h2>
+<h2 class="mb-4 text-2xl font-bold text-slate-800">Клиенты</h2>
 
 <form
     hx-post="/app/clients/create"
     hx-target="#clients-table"
     hx-swap="innerHTML"
-    style="margin-bottom: 20px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+    class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <input class="select" type="text" name="name" placeholder="Название клиента" required>
-        <input class="select" type="text" name="contact_person" placeholder="Контактное лицо">
-        <input class="select" type="text" name="phone" placeholder="Телефон">
-        <input class="select" type="email" name="email" placeholder="Email">
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Название клиента</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="name" required>
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Контактное лицо</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="contact_person">
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Телефон</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="phone">
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Email</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="email" name="email">
+        </div>
     </div>
 
-    <div class="mt-8">
-        <textarea class="textarea full-width" name="address" rows="2" placeholder="Адрес"></textarea>
+    <div class="mt-4">
+        <label class="mb-1 block font-semibold text-slate-700">Адрес</label>
+        <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="address" rows="2"></textarea>
     </div>
 
-    <div class="mt-8">
-        <textarea class="textarea full-width" name="notes" rows="2" placeholder="Заметки"></textarea>
+    <div class="mt-4">
+        <label class="mb-1 block font-semibold text-slate-700">Заметки</label>
+        <textarea class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="notes" rows="2"></textarea>
     </div>
 
-    <div class="mt-8">
-        <button type="submit" class="button button-blue">Добавить клиента</button>
+    <div class="mt-4">
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            Добавить клиента
+        </button>
     </div>
 </form>
 
-<div class="layout">
+<div class="flex items-start gap-5">
     <div
         id="clients-table"
-        class="orders-table-wrap"
+        class="flex-[2]"
         hx-get="/app/clients/table"
         hx-trigger="load, refreshClients from:body"
         hx-swap="innerHTML">
         Загрузка...
     </div>
 
-    <div id="client-detail" class="order-detail-wrap">
+    <div id="client-detail" class="min-w-[320px] flex-1 rounded-xl bg-white p-4 shadow-sm">
         Выбери клиента
     </div>
 </div>

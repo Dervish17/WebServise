@@ -3,7 +3,7 @@
 {% block title %}Пользователи{% endblock %}
 
 {% block content %}
-<h2 class="page-title">Пользователи</h2>
+<h2 class="mb-4 text-2xl font-bold text-slate-800">Пользователи</h2>
 
 <form
     id="create-user-form"
@@ -11,48 +11,51 @@
     hx-target="#create-user-result"
     hx-swap="innerHTML"
     hx-on::after-request="if(event.detail.successful) this.reset()"
-    class="card"
-    style="margin-bottom: 20px;">
+    class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
 
-    <div class="detail-row">
-        <label><strong>Фамилия</strong></label>
-        <input class="select full-width" type="text" name="last_name">
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Фамилия</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="last_name">
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Имя</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="first_name">
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Отчество</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" name="middle_name">
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Email</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="email" name="email" required>
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Пароль</label>
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="password" name="password" required>
+        </div>
+
+        <div>
+            <label class="mb-1 block font-semibold text-slate-700">Роль</label>
+            <select class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" name="role" required>
+                <option value="admin">admin</option>
+                <option value="manager">manager</option>
+                <option value="engineer">engineer</option>
+            </select>
+        </div>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Имя</strong></label>
-        <input class="select full-width" type="text" name="first_name">
+    <div class="mt-4">
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            Создать пользователя
+        </button>
     </div>
 
-    <div class="detail-row">
-        <label><strong>Отчество</strong></label>
-        <input class="select full-width" type="text" name="middle_name">
-    </div>
-
-    <div class="detail-row">
-        <label><strong>Email</strong></label>
-        <input class="select full-width" type="email" name="email" required>
-    </div>
-
-    <div class="detail-row">
-        <label><strong>Пароль</strong></label>
-        <input class="select full-width" type="password" name="password" required>
-    </div>
-
-    <div class="detail-row">
-        <label><strong>Роль</strong></label>
-        <select class="select full-width" name="role" required>
-            <option value="admin">admin</option>
-            <option value="manager">manager</option>
-            <option value="engineer">engineer</option>
-        </select>
-    </div>
-
-    <div class="detail-actions">
-        <button type="submit" class="button button-blue">Создать пользователя</button>
-    </div>
-
-    <div id="create-user-result"></div>
+    <div id="create-user-result" class="mt-3"></div>
 </form>
 
 <div
@@ -62,5 +65,6 @@
     hx-swap="innerHTML">
     Загрузка...
 </div>
-<div id="user-edit-modal" style="margin-top: 20px;"></div>
+
+<div id="user-edit-modal" class="mt-5"></div>
 {% endblock %}

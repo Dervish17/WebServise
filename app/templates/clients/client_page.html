@@ -3,23 +3,22 @@
 {% block title %}Клиент #{{ client.id }}{% endblock %}
 
 {% block content %}
-<div style="max-width: 760px; margin: 0 auto;">
-
-    <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+<div class="mx-auto max-w-3xl">
+    <div class="mb-4 flex flex-wrap gap-3">
         <a
             href="/app/clients"
-            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            class="font-semibold text-blue-600 hover:text-blue-700">
             ← Назад к клиентам
         </a>
 
         <a
             href="/app/orders"
-            style="text-decoration: none; color: #2563eb; font-weight: 600;">
+            class="font-semibold text-blue-600 hover:text-blue-700">
             ← К заявкам
         </a>
     </div>
 
-    <div id="client-detail" class="order-detail-wrap">
+    <div id="client-detail" class="rounded-xl bg-white p-5 shadow-sm">
         {% set standalone = True %}
         {% include "clients/_detail.html" %}
     </div>

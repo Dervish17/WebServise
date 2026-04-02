@@ -1,15 +1,16 @@
-<h3 class="detail-title">Клиент #{{ client.id }}</h3>
-<div class="detail-actions">
+<h3 class="mb-4 text-xl font-bold text-slate-800">Клиент #{{ client.id }}</h3>
+
+<div class="mb-4 flex flex-wrap gap-2">
     <button
-        class="button button-dark"
+        class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
         hx-get="/app/clients/{{ client.id }}/edit"
         hx-target="#client-detail"
         hx-swap="innerHTML">
         Редактировать
     </button>
+
     <button
-        class="button"
-        style="background: #dc2626;"
+        class="rounded-lg bg-red-600 px-4 py-2 font-medium text-white transition hover:bg-red-700"
         hx-delete="/app/clients/{{ client.id }}{% if standalone %}?redirect_to_list=1{% endif %}"
         hx-confirm="Удалить клиента?"
         hx-target="#client-detail"
@@ -18,78 +19,102 @@
     </button>
 </div>
 
-<p class="detail-row"><strong>Название:</strong> {{ client.name }}</p>
-<p class="detail-row"><strong>Контактное лицо:</strong> {{ client.contact_person or "-" }}</p>
-<p class="detail-row"><strong>Телефон:</strong> {{ client.phone or "-" }}</p>
-<p class="detail-row"><strong>Email:</strong> {{ client.email or "-" }}</p>
-<p class="detail-row"><strong>Адрес:</strong> {{ client.address or "-" }}</p>
-<p class="detail-row"><strong>Заметки:</strong> {{ client.notes or "-" }}</p>
+<p class="mb-2"><strong>Название:</strong> {{ client.name }}</p>
+<p class="mb-2"><strong>Контактное лицо:</strong> {{ client.contact_person or "-" }}</p>
+<p class="mb-2"><strong>Телефон:</strong> {{ client.phone or "-" }}</p>
+<p class="mb-2"><strong>Email:</strong> {{ client.email or "-" }}</p>
+<p class="mb-2"><strong>Адрес:</strong> {{ client.address or "-" }}</p>
+<p class="mb-4"><strong>Заметки:</strong> {{ client.notes or "-" }}</p>
 
-<hr class="separator">
+<hr class="my-5 border-t border-slate-200">
 
-<h4>Добавить оборудование</h4>
+<h4 class="mb-3 text-lg font-semibold">Добавить оборудование</h4>
 
 <form
     hx-post="/app/clients/{{ client.id }}/equipment/create"
     hx-target="#client-detail"
     hx-swap="innerHTML">
-    <input class="select full-width" type="text" name="name" placeholder="Название оборудования" required>
+    <input
+        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+        type="text"
+        name="name"
+        placeholder="Название оборудования"
+        required>
 
-    <div class="mt-8">
-        <input class="select full-width" type="text" name="model" placeholder="Модель">
+    <div class="mt-3">
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="model"
+            placeholder="Модель">
     </div>
 
-    <div class="mt-8">
-        <input class="select full-width" type="text" name="serial_number" placeholder="Серийный номер">
+    <div class="mt-3">
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="serial_number"
+            placeholder="Серийный номер">
     </div>
 
-    <div class="mt-8">
-        <input class="select full-width" type="text" name="manufacturer" placeholder="Производитель">
+    <div class="mt-3">
+        <input
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            type="text"
+            name="manufacturer"
+            placeholder="Производитель">
     </div>
 
-    <div class="mt-8">
-        <button type="submit" class="button button-blue">Добавить оборудование</button>
+    <div class="mt-3">
+        <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            Добавить оборудование
+        </button>
     </div>
 </form>
-<h4>Оборудование клиента</h4>
+
+<hr class="my-5 border-t border-slate-200">
+
+<h4 class="mb-3 text-lg font-semibold">Оборудование клиента</h4>
 
 {% for equipment in equipments %}
-    <div class="card card-soft">
-        <div class="card-title">{{ equipment.name or "Без названия" }}</div>
-        <div>Модель: {{ equipment.model or "-" }}</div>
-        <div>Серийный номер: {{ equipment.serial_number or "-" }}</div>
-        <div>Производитель: {{ equipment.manufacturer or "-" }}</div>
+    <div class="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+        <div class="mb-1 font-semibold text-slate-800">{{ equipment.name or "Без названия" }}</div>
+        <div class="text-sm text-slate-700">Модель: {{ equipment.model or "-" }}</div>
+        <div class="text-sm text-slate-700">Серийный номер: {{ equipment.serial_number or "-" }}</div>
+        <div class="text-sm text-slate-700">Производитель: {{ equipment.manufacturer or "-" }}</div>
     </div>
 {% else %}
-    <p class="muted">У клиента пока нет оборудования.</p>
+    <p class="text-slate-500">У клиента пока нет оборудования.</p>
 {% endfor %}
 
-<hr class="separator">
+<hr class="my-5 border-t border-slate-200">
 
-<h4>Последние заявки клиента</h4>
+<h4 class="mb-3 text-lg font-semibold">Последние заявки клиента</h4>
 
 {% for order in orders %}
     <a
         href="/app/orders/{{ order.id }}/page"
-        style="text-decoration: none; color: inherit; display: block;">
-        <div class="card card-soft" style="cursor: pointer;">
-        <div class="card-title">Заявка #{{ order.id }} — {{ order.title }}</div>
-        <div>
-            Статус:
-            {% if order.status == "new" %}
-                <span class="badge badge-new">Новая</span>
-            {% elif order.status == "in_progress" %}
-                <span class="badge badge-progress">В работе</span>
-            {% elif order.status == "done" %}
-                <span class="badge badge-done">Выполнена</span>
-            {% else %}
-                {{ order.status }}
-            {% endif %}
-        </div>
-        <div>Оборудование: {{ order.equipment.name if order.equipment else "-" }}</div>
-        <div>Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
+        class="block no-underline text-inherit">
+        <div class="mb-3 rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:bg-slate-100">
+            <div class="mb-2 font-semibold text-slate-800">Заявка #{{ order.id }} — {{ order.title }}</div>
+
+            <div class="mb-2 text-sm text-slate-700">
+                Статус:
+                {% if order.status == "new" %}
+                    <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
+                {% elif order.status == "in_progress" %}
+                    <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
+                {% elif order.status == "done" %}
+                    <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
+                {% else %}
+                    {{ order.status }}
+                {% endif %}
+            </div>
+
+            <div class="text-sm text-slate-700">Оборудование: {{ order.equipment.name if order.equipment else "-" }}</div>
+            <div class="text-sm text-slate-700">Стоимость: {{ order.total_cost if order.total_cost is not none else "-" }}</div>
         </div>
     </a>
 {% else %}
-    <p class="muted">У клиента пока нет заявок.</p>
+    <p class="text-slate-500">У клиента пока нет заявок.</p>
 {% endfor %}
