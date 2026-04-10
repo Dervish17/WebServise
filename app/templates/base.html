@@ -30,7 +30,15 @@
                             {{ request.state.current_user.middle_name or "" }}
                         </div>
                         <div class="opacity-80">
-                            {{ request.state.current_user.role }}
+                            {% if request.state.current_user.role == "admin" %}
+                                Администратор
+                            {% elif request.state.current_user.role == "manager" %}
+                                Менеджер
+                            {% elif request.state.current_user.role == "engineer" %}
+                                Инженер
+                            {% else %}
+                                {{ user.role }}
+                            {% endif %}
                         </div>
                     </div>
 

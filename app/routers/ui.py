@@ -35,24 +35,19 @@ def render_alert(request: Request, text: str, kind: str = "success", status_code
     )
 
 def get_current_ui_user(
-    ui_user_email: str | None = Cookie(default=None),
+    access_token: str | None = Cookie(default=None),
     db: Session = Depends(get_db),
 ) -> User:
-    if not ui_user_email:
+    user = get_user_from_token_value(access_token, db)
+
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
         )
 
-    user = db.query(User).filter(User.email == ui_user_email).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
-
     return user
+
 
 def get_user_from_token_value(token: str | None, db: Session) -> User | None:
     if not token:
@@ -60,14 +55,19 @@ def get_user_from_token_value(token: str | None, db: Session) -> User | None:
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
+        user_id_raw = payload.get("sub")
     except JWTError:
         return None
 
-    if not email:
+    if not user_id_raw:
         return None
 
-    user = db.query(User).filter(User.email == email).first()
+    try:
+        user_id = int(user_id_raw)
+    except (TypeError, ValueError):
+        return None
+
+    user = db.query(User).filter(User.id == user_id).first()
     return user
 
 @router.get("/app")
@@ -835,21 +835,13 @@ def login_submit(
         path="/",
     )
 
-    response.set_cookie(
-        key="ui_user_email",
-        value=email,
-        httponly=True,
-        samesite="lax",
-        path="/",
-    )
-
     return response
+
 
 @router.get("/app/logout")
 def logout():
     response = RedirectResponse(url="/app/login", status_code=303)
     response.delete_cookie("access_token", path="/")
-    response.delete_cookie("ui_user_email", path="/")
     return response
 
 @router.get("/app/users")

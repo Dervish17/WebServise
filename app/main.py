@@ -9,7 +9,7 @@ from app.routers.auth import router as auth_router
 from app.routers.order import router as order_router
 from app.routers.user import router as user_router
 from app.routers import client, equipment
-from app.routers.ui import router as ui_router
+from app.routers.ui import router as ui_router, get_user_from_token_value
 
 app = FastAPI()
 
@@ -30,13 +30,13 @@ async def ui_auth_middleware(request: Request, call_next):
     if path.startswith("/static"):
         return await call_next(request)
 
-    ui_user_email = request.cookies.get("ui_user_email")
+    access_token = request.cookies.get("access_token")
 
     if path in {"/", "/app", "/app/login", "/app/logout"}:
-        if ui_user_email:
+        if access_token:
             db = SessionLocal()
             try:
-                user = db.query(User).filter(User.email == ui_user_email).first()
+                user = get_user_from_token_value(access_token, db)
                 request.state.current_user = user
             finally:
                 db.close()
@@ -44,12 +44,12 @@ async def ui_auth_middleware(request: Request, call_next):
         return await call_next(request)
 
     if path.startswith("/app"):
-        if not ui_user_email:
+        if not access_token:
             return RedirectResponse(url="/app/login", status_code=303)
 
         db = SessionLocal()
         try:
-            user = db.query(User).filter(User.email == ui_user_email).first()
+            user = get_user_from_token_value(access_token, db)
             if not user:
                 return RedirectResponse(url="/app/login", status_code=303)
 
