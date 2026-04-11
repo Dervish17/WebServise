@@ -37,13 +37,21 @@
 
                 <td class="px-4 py-3 text-sm{% if loop.first %} bg-blue-50{% endif %}">
                     {% if order.status == "new" %}
-                        <span class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
+                    {% elif order.status == "diagnostics" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-violet-100 px-2 py-1 text-xs font-medium text-violet-700">Диагностика</span>
+                    {% elif order.status == "estimate_approved" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">Смета согласована</span>
                     {% elif order.status == "in_progress" %}
-                        <span class="rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
                     {% elif order.status == "done" %}
-                        <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
+                    {% elif order.status == "awaiting_payment" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700">Ожидание оплаты</span>
+                    {% elif order.status == "closed" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700">Закрыта</span>
                     {% else %}
-                        <span>{{ order.status }}</span>
+                        <span class="text-xs text-slate-500">{{ order.status }}</span>
                     {% endif %}
                 </td>
 

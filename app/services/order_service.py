@@ -11,9 +11,13 @@ from app.models.client import Client
 from app.models.status_history import StatusHistory
 
 ALLOWED_TRANSITIONS = {
-    OrderStatus.new.value: [OrderStatus.in_progress.value],
+    OrderStatus.new.value: [OrderStatus.diagnostics.value],
+    OrderStatus.diagnostics.value: [OrderStatus.estimate_approved.value],
+    OrderStatus.estimate_approved.value: [OrderStatus.in_progress.value],
     OrderStatus.in_progress.value: [OrderStatus.done.value],
-    OrderStatus.done.value: [],
+    OrderStatus.done.value: [OrderStatus.awaiting_payment.value],
+    OrderStatus.awaiting_payment.value: [OrderStatus.closed.value],
+    OrderStatus.closed.value: [],
 }
 
 def _validate_total_cost(total_cost):
@@ -38,6 +42,27 @@ def _create_order_log(
     )
     db.add(log)
     return log
+
+def _can_change_status(
+    current_user: User,
+    order: Order,
+    old_status: str,
+    new_status: str,
+) -> bool:
+    if current_user.role in {"admin", "manager"}:
+        return True
+
+    if current_user.role == "engineer":
+        return (
+            order.assigned_to == current_user.id
+            and (
+                (old_status == OrderStatus.estimate_approved.value and new_status == OrderStatus.in_progress.value)
+                or
+                (old_status == OrderStatus.in_progress.value and new_status == OrderStatus.done.value)
+            )
+        )
+
+    return False
 
 
 def create_order(
@@ -237,13 +262,13 @@ def change_status(
     if new_status.value not in allowed:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Cannot change status from {order.status} to {new_status.value}",
+            detail=f"Нельзя изменить статус с {order.status} на {new_status.value}",
         )
 
-    if current_user.role != "admin" and order.assigned_to != current_user.id:
+    if not _can_change_status(current_user, order, order.status, new_status.value):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only assigned engineer or admin can change status",
+            detail="Недостаточно прав для смены этого статуса",
         )
 
     old_status = order.status
@@ -251,9 +276,21 @@ def change_status(
 
     status_names = {
         "new": "Новая",
+        "diagnostics": "Диагностика",
+        "estimate_approved": "Смета согласована",
         "in_progress": "В работе",
         "done": "Выполнена",
+        "awaiting_payment": "Ожидание оплаты",
+        "closed": "Закрыта",
     }
+
+    history = StatusHistory(
+        order_id=order.id,
+        old_status=old_status,
+        new_status=new_status.value,
+        changed_by=current_user.id,
+    )
+    db.add(history)
 
     _create_order_log(
         db=db,

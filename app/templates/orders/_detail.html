@@ -30,10 +30,18 @@
     <strong>Статус:</strong>
     {% if order.status == "new" %}
         <span class="rounded-full bg-blue-100 px-2 py-1 text-sm text-blue-700">Новая</span>
+    {% elif order.status == "diagnostics" %}
+        <span class="rounded-full bg-violet-100 px-2 py-1 text-sm text-violet-700">Диагностика</span>
+    {% elif order.status == "estimate_approved" %}
+        <span class="rounded-full bg-indigo-100 px-2 py-1 text-sm text-indigo-700">Смета согласована</span>
     {% elif order.status == "in_progress" %}
         <span class="rounded-full bg-amber-100 px-2 py-1 text-sm text-amber-700">В работе</span>
     {% elif order.status == "done" %}
         <span class="rounded-full bg-green-100 px-2 py-1 text-sm text-green-700">Выполнена</span>
+    {% elif order.status == "awaiting_payment" %}
+        <span class="rounded-full bg-orange-100 px-2 py-1 text-sm text-orange-700">Ожидание оплаты</span>
+    {% elif order.status == "closed" %}
+        <span class="rounded-full bg-slate-200 px-2 py-1 text-sm text-slate-700">Закрыта</span>
     {% else %}
         <span>{{ order.status }}</span>
     {% endif %}
@@ -42,13 +50,34 @@
 <div class="mb-4">
     {% if order.status == "new" %}
         <button
-            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+            class="rounded-lg bg-violet-600 px-4 py-2 font-medium text-white transition hover:bg-violet-700"
+            hx-post="/app/orders/{{ order.id }}/status"
+            hx-vals='{"new_status":"diagnostics"}'
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            Передать в диагностику
+        </button>
+
+    {% elif order.status == "diagnostics" %}
+        <button
+            class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700"
+            hx-post="/app/orders/{{ order.id }}/status"
+            hx-vals='{"new_status":"estimate_approved"}'
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            Смета согласована
+        </button>
+
+    {% elif order.status == "estimate_approved" %}
+        <button
+            class="rounded-lg bg-amber-600 px-4 py-2 font-medium text-white transition hover:bg-amber-700"
             hx-post="/app/orders/{{ order.id }}/status"
             hx-vals='{"new_status":"in_progress"}'
             hx-target="#order-detail"
             hx-swap="innerHTML">
-            Перевести в работу
+            Начать ремонт
         </button>
+
     {% elif order.status == "in_progress" %}
         <button
             class="rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition hover:bg-green-700"
@@ -56,10 +85,36 @@
             hx-vals='{"new_status":"done"}'
             hx-target="#order-detail"
             hx-swap="innerHTML">
-            Завершить
+            Выполнено
         </button>
+
     {% elif order.status == "done" %}
-        <span class="text-slate-500">Заявка завершена</span>
+        <button
+            class="rounded-lg bg-orange-600 px-4 py-2 font-medium text-white transition hover:bg-orange-700"
+            hx-post="/app/orders/{{ order.id }}/status"
+            hx-vals='{"new_status":"awaiting_payment"}'
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            Ожидание оплаты
+        </button>
+
+    {% elif order.status == "awaiting_payment" %}
+        <button
+            class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
+            hx-post="/app/orders/{{ order.id }}/status"
+            hx-vals='{"new_status":"closed"}'
+            hx-target="#order-detail"
+            hx-swap="innerHTML">
+            Закрыть заявку
+        </button>
+
+    {% elif order.status == "closed" %}
+        <span class="text-slate-500">Заявка закрыта</span>
+
+    {% else %}
+        <span class="text-red-600 text-sm">
+            Для статуса "{{ order.status }}" кнопка не определена
+        </span>
     {% endif %}
 </div>
 

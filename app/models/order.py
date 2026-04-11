@@ -20,7 +20,7 @@ class Order(Base):
     __tablename__ = "orders"
     __table_args__ = (
         CheckConstraint(
-            "status in ('new', 'in_progress', 'done')",
+            "status in ('new', 'diagnostics', 'estimate_approved', 'in_progress', 'done', 'awaiting_payment', 'closed')",
             name="ck_orders_status_valid",
         ),
         CheckConstraint(
