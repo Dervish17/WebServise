@@ -20,6 +20,24 @@
         hx-swap="innerHTML">
         Удалить
     </button>
+
+    {% if order.status != "new" %}
+        <a
+            href="/app/orders/{{ order.id }}/estimate/pdf"
+            target="_blank"
+            class="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700">
+            Скачать смету
+        </a>
+    {% endif %}
+
+    {% if order.status in ["done", "awaiting_payment", "closed"] %}
+        <a
+            href="/app/orders/{{ order.id }}/act/pdf"
+            target="_blank"
+            class="rounded-lg bg-emerald-600 px-4 py-2 font-medium text-white transition hover:bg-emerald-700">
+            Скачать акт
+        </a>
+    {% endif %}
 </div>
 {% endif %}
 

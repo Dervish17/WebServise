@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Cookie, Depends, Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session, joinedload
@@ -15,6 +15,8 @@ from app.models.order import Order
 from app.models.order_log import OrderLog
 from app.models.user import User
 from app.services.auth_service import login_user
+from app.services.document_service import build_act_pdf, build_estimate_pdf
+from app.services.report_service import build_reports_context, parse_report_dates
 from app.services.client_service import (
     create_client,
     delete_client,
@@ -808,6 +810,79 @@ def my_orders_table(
         request,
         "orders/_engineer_table.html",
         {"orders": orders},
+    )
+
+@router.get("/app/orders/{order_id}/estimate/pdf")
+def download_estimate_pdf(
+    order_id: int,
+    db: DbSession,
+    _current_user: ManagerOrAdminUser,
+):
+    order = get_order_by_id(db, order_id)
+    pdf_bytes = build_estimate_pdf(order)
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="estimate_order_{order_id}.pdf"'
+        },
+    )
+
+
+@router.get("/app/orders/{order_id}/act/pdf")
+def download_act_pdf(
+    order_id: int,
+    db: DbSession,
+    _current_user: ManagerOrAdminUser,
+):
+    order = get_order_by_id(db, order_id)
+    pdf_bytes = build_act_pdf(order)
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="act_order_{order_id}.pdf"'
+        },
+    )
+
+@router.get("/app/reports")
+def reports_page(
+    request: Request,
+    _current_user: ManagerOrAdminUser,
+) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request,
+        "reports/page.html",
+        {},
+    )
+
+
+@router.get("/app/reports/summary")
+def reports_summary(
+    request: Request,
+    db: DbSession,
+    _current_user: ManagerOrAdminUser,
+    date_from: str | None = None,
+    date_to: str | None = None,
+) -> HTMLResponse:
+    try:
+        parsed_date_from, parsed_date_to = parse_report_dates(date_from, date_to)
+    except ValueError as exc:
+        return render_hx_alert(
+            request,
+            text=str(exc),
+            kind="error",
+            target="#global-alert",
+        )
+
+    context = build_reports_context(db, parsed_date_from, parsed_date_to)
+
+    return templates.TemplateResponse(
+        request,
+        "reports/_summary.html",
+        context,
     )
 
 @router.get("/app/orders")

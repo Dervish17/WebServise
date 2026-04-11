@@ -37,8 +37,17 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-            <button type="submit" class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+            <button
+                type="submit"
+                class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
                 Сохранить
+            </button>
+
+            <button
+                type="button"
+                class="rounded-lg bg-slate-200 px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-300"
+                onclick="document.getElementById('user-edit-modal').innerHTML = ''">
+                Отмена
             </button>
         </div>
     </form>

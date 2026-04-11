@@ -12,52 +12,173 @@
 
 {% set is_login_page = request.url.path == "/app/login" %}
 {% set current_user = request.state.current_user %}
+{% set current_path = request.url.path %}
 
-    <header class="bg-slate-800 text-white">
-        <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-            <h1 class="text-2xl font-bold">Профсервис</h1>
+<header class="border-b border-slate-200 bg-white shadow-sm">
+    <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-center gap-4">
+                <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white shadow-sm">
+                    П
+                </div>
+
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Профсервис</h1>
+                    <p class="text-sm text-slate-500">Система учёта заявок на ремонт оборудования</p>
+                </div>
+            </div>
 
             {% if current_user and not is_login_page %}
-                <div class="flex items-center gap-5">
-                    <nav class="flex gap-4">
-                        <a href="/app/orders" class="font-semibold text-white no-underline hover:text-slate-200">Заявки</a>
-                        {% if has_role(current_user, "engineer") %}
-                            <a href="/app/my-orders" class="font-semibold text-white no-underline hover:text-slate-200">Мои заявки</a>
-                        {% endif %}
-                        <a href="/app/clients" class="font-semibold text-white no-underline hover:text-slate-200">Клиенты</a>
-                        <a href="/app/equipment" class="font-semibold text-white no-underline hover:text-slate-200">Оборудование</a>
-
-                        {% if is_admin(current_user) %}
-                            <a href="/app/users" class="font-semibold text-white no-underline hover:text-slate-200">Пользователи</a>
-                        {% endif %}
-
-                        <a href="/app/profile" class="font-semibold text-white no-underline hover:text-slate-200">Мой профиль</a>
-                    </nav>
-
-                    <div class="text-right text-sm text-white">
-                        <div>
-                            {{ current_user.last_name or "" }}
-                            {{ current_user.first_name or "" }}
-                            {{ current_user.middle_name or "" }}
+                <div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-700">
+                            {{ (current_user.last_name or current_user.email or "U")[0]|upper }}
                         </div>
-                        <div class="opacity-80">
-                            {% if current_user.role == "admin" %}
-                                Администратор
-                            {% elif current_user.role == "manager" %}
-                                Менеджер
-                            {% elif current_user.role == "engineer" %}
-                                Инженер
-                            {% else %}
-                                {{ current_user.role }}
-                            {% endif %}
+
+                        <div class="min-w-0">
+                            {% set fio = [current_user.last_name, current_user.first_name, current_user.middle_name] | select | join(' ') %}
+                            <div class="truncate text-sm font-semibold text-slate-800">
+                                {{ fio if fio else current_user.email }}
+                            </div>
+
+                            <div class="mt-1 flex flex-wrap items-center gap-2">
+                                <span class="rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-700">
+                                    {% if current_user.role == "admin" %}
+                                        Администратор
+                                    {% elif current_user.role == "manager" %}
+                                        Менеджер
+                                    {% elif current_user.role == "engineer" %}
+                                        Инженер
+                                    {% else %}
+                                        {{ current_user.role }}
+                                    {% endif %}
+                                </span>
+
+                                <span class="truncate text-xs text-slate-500">
+                                    {{ current_user.email }}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    <a href="/app/logout" class="font-semibold text-white no-underline hover:text-slate-200">Выход</a>
+                    <a
+                        href="/app/logout"
+                        class="shrink-0 rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100">
+                        Выход
+                    </a>
                 </div>
             {% endif %}
         </div>
-    </header>
+
+        {% if current_user and not is_login_page %}
+            <nav class="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-4">
+                <a
+                    href="/app/orders"
+                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition
+                    {% if current_path.startswith('/app/orders') and not current_path.startswith('/app/my-orders') %}
+                        bg-blue-600 text-white shadow-sm
+                    {% else %}
+                        bg-slate-100 text-slate-700 hover:bg-slate-200
+                    {% endif %}">
+                    {% if current_path.startswith('/app/orders') and not current_path.startswith('/app/my-orders') %}
+                        <span class="h-2 w-2 rounded-full bg-white"></span>
+                    {% endif %}
+                    <span>Заявки</span>
+                </a>
+
+                {% if has_role(current_user, "engineer") %}
+                    <a
+                        href="/app/my-orders"
+                        class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition
+                        {% if current_path.startswith('/app/my-orders') %}
+                            bg-blue-600 text-white shadow-sm
+                        {% else %}
+                            bg-slate-100 text-slate-700 hover:bg-slate-200
+                        {% endif %}">
+                        {% if current_path.startswith('/app/my-orders') %}
+                            <span class="h-2 w-2 rounded-full bg-white"></span>
+                        {% endif %}
+                        <span>Мои заявки</span>
+                    </a>
+                {% endif %}
+
+                <a
+                    href="/app/clients"
+                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition
+                    {% if current_path.startswith('/app/clients') %}
+                        bg-blue-600 text-white shadow-sm
+                    {% else %}
+                        bg-slate-100 text-slate-700 hover:bg-slate-200
+                    {% endif %}">
+                    {% if current_path.startswith('/app/clients') %}
+                        <span class="h-2 w-2 rounded-full bg-white"></span>
+                    {% endif %}
+                    <span>Клиенты</span>
+                </a>
+
+                <a
+                    href="/app/equipment"
+                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition
+                    {% if current_path.startswith('/app/equipment') %}
+                        bg-blue-600 text-white shadow-sm
+                    {% else %}
+                        bg-slate-100 text-slate-700 hover:bg-slate-200
+                    {% endif %}">
+                    {% if current_path.startswith('/app/equipment') %}
+                        <span class="h-2 w-2 rounded-full bg-white"></span>
+                    {% endif %}
+                    <span>Оборудование</span>
+                </a>
+
+                {% if can_manage(current_user) %}
+                    <a
+                        href="/app/reports"
+                        class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition
+                        {% if current_path.startswith('/app/reports') %}
+                            bg-blue-600 text-white shadow-sm
+                        {% else %}
+                            bg-slate-100 text-slate-700 hover:bg-slate-200
+                        {% endif %}">
+                        {% if current_path.startswith('/app/reports') %}
+                            <span class="h-2 w-2 rounded-full bg-white"></span>
+                        {% endif %}
+                        <span>Отчёты</span>
+                    </a>
+                {% endif %}
+
+                {% if is_admin(current_user) %}
+                    <a
+                        href="/app/users"
+                        class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition
+                        {% if current_path.startswith('/app/users') %}
+                            bg-blue-600 text-white shadow-sm
+                        {% else %}
+                            bg-slate-100 text-slate-700 hover:bg-slate-200
+                        {% endif %}">
+                        {% if current_path.startswith('/app/users') %}
+                            <span class="h-2 w-2 rounded-full bg-white"></span>
+                        {% endif %}
+                        <span>Пользователи</span>
+                    </a>
+                {% endif %}
+
+                <a
+                    href="/app/profile"
+                    class="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition
+                    {% if current_path.startswith('/app/profile') %}
+                        bg-blue-600 text-white shadow-sm
+                    {% else %}
+                        bg-slate-100 text-slate-700 hover:bg-slate-200
+                    {% endif %}">
+                    {% if current_path.startswith('/app/profile') %}
+                        <span class="h-2 w-2 rounded-full bg-white"></span>
+                    {% endif %}
+                    <span>Мой профиль</span>
+                </a>
+            </nav>
+        {% endif %}
+    </div>
+</header>
 
     <main class="mx-auto max-w-7xl px-4 py-6">
          <div id="global-alert" class="mb-4"></div>

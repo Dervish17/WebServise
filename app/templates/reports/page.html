@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Отчёты{% endblock %}
+
+{% block content %}
+<h2 class="mb-4 text-2xl font-bold text-slate-800">Отчёты</h2>
+
+<div class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div>
+            <label for="report-date-from" class="mb-1 block font-semibold text-slate-700">Дата с</label>
+            <input
+                id="report-date-from"
+                name="date_from"
+                type="date"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                hx-get="/app/reports/summary"
+                hx-trigger="change"
+                hx-target="#reports-summary"
+                hx-swap="innerHTML"
+                hx-include="#report-date-to">
+        </div>
+
+        <div>
+            <label for="report-date-to" class="mb-1 block font-semibold text-slate-700">Дата по</label>
+            <input
+                id="report-date-to"
+                name="date_to"
+                type="date"
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                hx-get="/app/reports/summary"
+                hx-trigger="change"
+                hx-target="#reports-summary"
+                hx-swap="innerHTML"
+                hx-include="#report-date-from">
+        </div>
+
+        <div class="flex items-end">
+            <button
+                type="button"
+                class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700"
+                hx-get="/app/reports/summary"
+                hx-target="#reports-summary"
+                hx-swap="innerHTML"
+                hx-include="#report-date-from, #report-date-to">
+                Сформировать
+            </button>
+        </div>
+    </div>
+</div>
+
+<div
+    id="reports-summary"
+    hx-get="/app/reports/summary"
+    hx-trigger="load"
+    hx-swap="innerHTML">
+    Загрузка...
+</div>
+{% endblock %}

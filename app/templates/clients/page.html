@@ -6,75 +6,93 @@
 <h2 class="mb-4 text-2xl font-bold text-slate-800">Клиенты</h2>
 
 {% if can_manage(request.state.current_user) %}
-<form
-    hx-post="/app/clients/create"
-    hx-target="#clients-table"
-    hx-swap="innerHTML"
-    class="mb-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-
-    <h3 class="mb-4 text-lg font-semibold text-slate-800">Создание клиента</h3>
-
-    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-        <div>
-            <label class="mb-1 block font-semibold text-slate-700">Название клиента</label>
-            <input
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                type="text"
-                name="name"
-                minlength="1"
-                maxlength="255"
-                required>
+<details class="compact-create mb-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm group">
+    <summary class="flex cursor-pointer items-center justify-between bg-slate-50 px-4 py-3 transition hover:bg-slate-100">
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                +
+            </span>
+            <div>
+                <div class="font-semibold text-slate-800">Добавить клиента</div>
+                <div class="text-xs text-slate-500">Форма регистрации нового клиента</div>
+            </div>
         </div>
 
-        <div>
-            <label class="mb-1 block font-semibold text-slate-700">Контактное лицо</label>
-            <input
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                type="text"
-                name="contact_person">
+        <div class="text-sm font-medium text-blue-600">
+            <span class="group-open:hidden">Развернуть</span>
+            <span class="hidden group-open:inline">Свернуть</span>
         </div>
+    </summary>
 
-        <div>
-            <label class="mb-1 block font-semibold text-slate-700">Телефон</label>
-            <input
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                type="text"
-                name="phone">
-        </div>
+    <div class="border-t border-slate-200 px-5 py-5">
+        <form
+            hx-post="/app/clients/create"
+            hx-target="#clients-table"
+            hx-swap="innerHTML">
 
-        <div>
-            <label class="mb-1 block font-semibold text-slate-700">Email</label>
-            <input
-                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                type="email"
-                name="email">
-        </div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div>
+                    <label class="mb-1 block font-semibold text-slate-700">Название клиента</label>
+                    <input
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        type="text"
+                        name="name"
+                        minlength="1"
+                        maxlength="255"
+                        required>
+                </div>
+
+                <div>
+                    <label class="mb-1 block font-semibold text-slate-700">Контактное лицо</label>
+                    <input
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        type="text"
+                        name="contact_person">
+                </div>
+
+                <div>
+                    <label class="mb-1 block font-semibold text-slate-700">Телефон</label>
+                    <input
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        type="text"
+                        name="phone">
+                </div>
+
+                <div>
+                    <label class="mb-1 block font-semibold text-slate-700">Email</label>
+                    <input
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        type="email"
+                        name="email">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="mb-1 block font-semibold text-slate-700">Адрес</label>
+                    <textarea
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        name="address"
+                        rows="2"></textarea>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="mb-1 block font-semibold text-slate-700">Заметки</label>
+                    <textarea
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                        name="notes"
+                        rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button
+                    type="submit"
+                    class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+                    Добавить клиента
+                </button>
+            </div>
+        </form>
     </div>
-
-    <div class="mt-4">
-        <label class="mb-1 block font-semibold text-slate-700">Адрес</label>
-        <textarea
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-            name="address"
-            rows="2"></textarea>
-    </div>
-
-    <div class="mt-4">
-        <label class="mb-1 block font-semibold text-slate-700">Заметки</label>
-        <textarea
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-            name="notes"
-            rows="2"></textarea>
-    </div>
-
-    <div class="mt-4">
-        <button
-            type="submit"
-            class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
-            Добавить клиента
-        </button>
-    </div>
-</form>
+</details>
 {% endif %}
 <div class="mb-4 flex flex-wrap items-end gap-3">
     <div class="min-w-[280px] flex-1">

@@ -6,3 +6,11 @@ html {
 body {
     min-height: 100vh;
 }
+
+details.compact-create summary {
+    list-style: none;
+}
+
+details.compact-create summary::-webkit-details-marker {
+    display: none;
+}
