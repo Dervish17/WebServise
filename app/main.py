@@ -14,9 +14,13 @@ from app.routers.user import router as user_router
 from app.routers import client, equipment
 from app.routers.ui import router as ui_router, get_user_from_token_value
 from app.core.csrf import generate_csrf_token
+from app.core.template_helpers import can_manage, has_role, is_admin
 
 app = FastAPI()
 templates = Jinja2Templates(directory="app/templates")
+templates.env.globals["has_role"] = has_role
+templates.env.globals["is_admin"] = is_admin
+templates.env.globals["can_manage"] = can_manage
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import ALGORITHM, SECRET_KEY
 from app.core.enums import OrderStatus
+from app.core.template_helpers import can_manage, has_role, is_admin
 from app.db.session import get_db
 from app.models.equipment import Equipment
 from app.models.order import Order
@@ -46,9 +47,17 @@ from app.services.user_service import (
     update_profile,
     update_user,
 )
+from app.core.login_rate_limit import (
+    clear_login_failures,
+    ensure_login_allowed,
+    record_failed_login,
+)
 
 router = APIRouter(tags=["ui"])
 templates = Jinja2Templates(directory="app/templates")
+templates.env.globals["has_role"] = has_role
+templates.env.globals["is_admin"] = is_admin
+templates.env.globals["can_manage"] = can_manage
 
 DbSession = Annotated[Session, Depends(get_db)]
 
@@ -350,9 +359,25 @@ def login_submit(
     email: str = Form(...),
     password: str = Form(...),
 ):
+    client_ip = request.client.host if request.client else "unknown"
+
+    try:
+        ensure_login_allowed(client_ip, email)
+    except HTTPException as exc:
+        return templates.TemplateResponse(
+            request,
+            "auth/login.html",
+            {
+                "error": str(exc.detail),
+                "email": email,
+            },
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+
     try:
         result = login_user(db, email, password)
     except HTTPException:
+        record_failed_login(client_ip, email)
         return templates.TemplateResponse(
             request,
             "auth/login.html",
@@ -370,6 +395,7 @@ def login_submit(
         token = result.get("access_token")
 
     if not token:
+        record_failed_login(client_ip, email)
         return templates.TemplateResponse(
             request,
             "auth/login.html",
@@ -379,6 +405,8 @@ def login_submit(
             },
             status_code=status.HTTP_400_BAD_REQUEST,
         )
+
+    clear_login_failures(client_ip, email)
 
     response = RedirectResponse(url="/app/orders", status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(

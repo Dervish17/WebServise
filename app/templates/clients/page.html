@@ -5,7 +5,7 @@
 {% block content %}
 <h2 class="mb-4 text-2xl font-bold text-slate-800">Клиенты</h2>
 
-{% if request.state.current_user and request.state.current_user.role in ["admin", "manager"] %}
+{% if can_manage(request.state.current_user) %}
 <form
     hx-post="/app/clients/create"
     hx-target="#clients-table"
@@ -21,6 +21,8 @@
                 class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                 type="text"
                 name="name"
+                minlength="1"
+                maxlength="255"
                 required>
         </div>
 

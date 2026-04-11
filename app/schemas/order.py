@@ -1,16 +1,40 @@
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.enums import OrderStatus
 
 
+def _clean_required(value: str, field_name: str) -> str:
+    value = value.strip()
+    if not value:
+        raise ValueError(f"{field_name} не может быть пустым")
+    return value
+
+
+def _clean_optional(value: str | None) -> str | None:
+    if value is None:
+        return None
+    value = value.strip()
+    return value or None
+
+
 class OrderCreate(BaseModel):
     title: str
-    description: str
+    description: str | None = None
     equipment_id: int
-    total_cost: Decimal | None = None
+    total_cost: Decimal | None = Field(default=None, ge=0)
+
+    @field_validator("title", mode="before")
+    @classmethod
+    def validate_title(cls, value: str) -> str:
+        return _clean_required(value, "Название заявки")
+
+    @field_validator("description", mode="before")
+    @classmethod
+    def clean_description(cls, value):
+        return _clean_optional(value)
 
 
 class AssignOrderRequest(BaseModel):
@@ -23,6 +47,11 @@ class ChangeStatusRequest(BaseModel):
 
 class CreateCommentRequest(BaseModel):
     text: str
+
+    @field_validator("text", mode="before")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        return _clean_required(value, "Комментарий")
 
 
 class ClientShortResponse(BaseModel):
@@ -55,7 +84,7 @@ class OrderResponse(BaseModel):
 
     id: int
     title: str
-    description: str
+    description: str | None
     status: str
     total_cost: Decimal | None
     client_id: int

@@ -1,6 +1,6 @@
 <h3 class="mb-4 text-xl font-bold text-slate-800">Клиент #{{ client.id }}</h3>
 
-{% if request.state.current_user and request.state.current_user.role in ["admin", "manager"] %}
+{% if can_manage(request.state.current_user) %}
 <div class="mb-4 flex flex-wrap gap-2">
     <button
         class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
@@ -49,6 +49,8 @@
             class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
             type="text"
             name="name"
+            minlength="1"
+            maxlength="255"
             required>
     </div>
 

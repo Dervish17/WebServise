@@ -1,6 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.normalization import (
+    clean_optional_text,
+    clean_required_text,
+    normalize_optional_email,
+)
 from app.models.client import Client
 from app.models.order import Order
 from app.models.equipment import Equipment
@@ -15,6 +20,20 @@ def create_client(
     address: str | None = None,
     notes: str | None = None,
 ) -> Client:
+    try:
+        name = clean_required_text(name, "Название клиента")
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    contact_person = clean_optional_text(contact_person)
+    phone = clean_optional_text(phone)
+    email = normalize_optional_email(email)
+    address = clean_optional_text(address)
+    notes = clean_optional_text(notes)
+
     client = Client(
         name=name,
         contact_person=contact_person,
@@ -39,6 +58,7 @@ def get_all_clients(
     query = db.query(Client)
 
     if search:
+        search = search.strip()
         query = query.filter(
             (Client.name.ilike(f"%{search}%")) |
             (Client.contact_person.ilike(f"%{search}%")) |
@@ -71,6 +91,7 @@ def get_client_by_id(db: Session, client_id: int) -> type[Client]:
 
     return client
 
+
 def update_client(
     db: Session,
     client_id: int,
@@ -83,6 +104,20 @@ def update_client(
 ) -> Client:
     client = get_client_by_id(db, client_id)
 
+    try:
+        name = clean_required_text(name, "Название клиента")
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    contact_person = clean_optional_text(contact_person)
+    phone = clean_optional_text(phone)
+    email = normalize_optional_email(email)
+    address = clean_optional_text(address)
+    notes = clean_optional_text(notes)
+
     client.name = name
     client.contact_person = contact_person
     client.phone = phone
@@ -94,6 +129,7 @@ def update_client(
     db.refresh(client)
 
     return client
+
 
 def delete_client(db: Session, client_id: int) -> None:
     client = get_client_by_id(db, client_id)

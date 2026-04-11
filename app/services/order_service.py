@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.enums import OrderStatus
+from app.core.normalization import clean_optional_text, clean_required_text
 from app.models.equipment import Equipment
 from app.models.order import Order
 from app.models.order_log import OrderLog
@@ -15,6 +16,12 @@ ALLOWED_TRANSITIONS = {
     OrderStatus.done.value: [],
 }
 
+def _validate_total_cost(total_cost):
+    if total_cost is not None and total_cost < 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Стоимость не может быть отрицательной",
+        )
 
 def _create_order_log(
         db: Session,
@@ -41,6 +48,17 @@ def create_order(
         current_user: User,
         total_cost=None,
 ) -> Order:
+    _validate_total_cost(total_cost)
+
+    try:
+        title = clean_required_text(title, "Название заявки")
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    description = clean_optional_text(description)
     equipment = db.query(Equipment).filter(Equipment.id == equipment_id).first()
 
     if not equipment:
@@ -261,6 +279,14 @@ def add_comment(
         text: str,
         current_user: User,
 ) -> OrderLog:
+    try:
+        text = clean_required_text(text, "Комментарий")
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
     order = get_order_by_id(db, order_id)
 
     log = OrderLog(
@@ -284,6 +310,18 @@ def update_order(
         description: str | None = None,
         total_cost=None,
 ) -> Order:
+    _validate_total_cost(total_cost)
+
+    try:
+        title = clean_required_text(title, "Название заявки")
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    description = clean_optional_text(description)
+
     order = get_order_by_id(db, order_id)
 
     order.title = title

@@ -7,10 +7,10 @@ from app.models.order import Order
 from app.models.order_log import OrderLog
 from app.models.status_history import StatusHistory
 from app.models.user import User
-
-
-def _normalize_email(email: str) -> str:
-    return email.strip().lower()
+from app.core.normalization import (
+    clean_optional_text,
+    normalize_email,
+)
 
 
 def _validate_role(role: str) -> str:
@@ -32,8 +32,12 @@ def create_user(
     first_name: str | None = None,
     middle_name: str | None = None,
 ) -> User:
-    email = _normalize_email(email)
+    email = normalize_email(email)
     role = _validate_role(role)
+
+    last_name = clean_optional_text(last_name)
+    first_name = clean_optional_text(first_name)
+    middle_name = clean_optional_text(middle_name)
 
     if len(password) < 6:
         raise HTTPException(
@@ -78,8 +82,12 @@ def update_user(
     if not user:
         raise ValueError("User not found")
 
-    email = _normalize_email(email)
+    email = normalize_email(email)
     role = _validate_role(role)
+
+    last_name = clean_optional_text(last_name)
+    first_name = clean_optional_text(first_name)
+    middle_name = clean_optional_text(middle_name)
 
     existing_user = (
         db.query(User)
@@ -229,7 +237,11 @@ def update_profile(
             detail="Пользователь не найден",
         )
 
-    email = _normalize_email(email)
+    email = normalize_email(email)
+
+    last_name = clean_optional_text(last_name)
+    first_name = clean_optional_text(first_name)
+    middle_name = clean_optional_text(middle_name)
 
     existing_user = (
         db.query(User)

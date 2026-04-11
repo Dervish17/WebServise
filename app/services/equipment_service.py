@@ -1,6 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.normalization import (
+    clean_optional_text,
+    clean_required_text,
+    normalize_serial_number,
+)
 from app.models.client import Client
 from app.models.equipment import Equipment
 from app.models.order import Order
@@ -21,6 +26,18 @@ def create_equipment(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Client not found",
         )
+
+    try:
+        name = clean_required_text(name, "Название оборудования")
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    model = clean_optional_text(model)
+    serial_number = normalize_serial_number(serial_number)
+    manufacturer = clean_optional_text(manufacturer)
 
     equipment = Equipment(
         name=name,
@@ -49,6 +66,7 @@ def get_all_equipment(
     )
 
     if search:
+        search = search.strip()
         query = query.filter(
             (Equipment.name.ilike(f"%{search}%")) |
             (Equipment.model.ilike(f"%{search}%")) |
@@ -90,6 +108,18 @@ def update_equipment(
         manufacturer: str | None = None,
 ) -> Equipment:
     equipment = get_equipment_by_id(db, equipment_id)
+
+    try:
+        name = clean_required_text(name, "Название оборудования")
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    model = clean_optional_text(model)
+    serial_number = normalize_serial_number(serial_number)
+    manufacturer = clean_optional_text(manufacturer)
 
     equipment.name = name
     equipment.model = model
