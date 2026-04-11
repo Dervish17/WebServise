@@ -185,8 +185,110 @@
 </form>
 {% endif %}
 
-<p class="mb-4"><strong>Стоимость:</strong> {{ order.total_cost if order.total_cost is not none else "-" }}</p>
+<p class="mb-4">
+    <strong>{% if order.items %}Итоговая стоимость по смете:{% else %}Стоимость:{% endif %}</strong>
+    {{ order.total_cost if order.total_cost is not none else "-" }}
+</p>
+<h4 class="mb-3 text-lg font-semibold">Позиции сметы</h4>
 
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-3 py-2 text-left text-sm font-semibold text-slate-700">Наименование</th>
+                <th class="px-3 py-2 text-left text-sm font-semibold text-slate-700">Кол-во</th>
+                <th class="px-3 py-2 text-left text-sm font-semibold text-slate-700">Цена</th>
+                <th class="px-3 py-2 text-left text-sm font-semibold text-slate-700">Сумма</th>
+                {% if can_manage(request.state.current_user) %}
+                    <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Действие</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100 bg-white">
+            {% for item in order.items %}
+                <tr>
+                    <td class="px-3 py-2 text-sm text-slate-800">{{ item.title }}</td>
+                    <td class="px-3 py-2 text-sm text-slate-700">{{ item.quantity }}</td>
+                    <td class="px-3 py-2 text-sm text-slate-700">{{ item.unit_price }}</td>
+                    <td class="px-3 py-2 text-sm text-slate-700">{{ item.line_total }}</td>
+                    {% if can_manage(request.state.current_user) %}
+                        <td class="px-4 py-3 text-sm">
+                            <button
+                                class="rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                                hx-delete="/app/orders/{{ order.id }}/items/{{ item.id }}"
+                                hx-confirm="Удалить позицию сметы?"
+                                hx-target="#order-detail"
+                                hx-swap="innerHTML">
+                                Удалить
+                            </button>
+                        </td>
+                    {% endif %}
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="{% if can_manage(request.state.current_user) %}5{% else %}4{% endif %}" class="px-4 py-5 text-center text-sm text-slate-500">
+                        Позиции сметы пока не добавлены
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if can_manage(request.state.current_user) %}
+    <form
+        hx-post="/app/orders/{{ order.id }}/items/add"
+        hx-target="#order-detail"
+        hx-swap="innerHTML"
+        class="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+
+        <h5 class="mb-3 text-base font-semibold text-slate-800">Добавить позицию</h5>
+
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <div class="md:col-span-2">
+                <label class="mb-1 block font-semibold text-slate-700">Наименование</label>
+                <input
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    type="text"
+                    name="title"
+                    required>
+            </div>
+
+
+
+            <div>
+                <label class="mb-1 block font-semibold text-slate-700">Количество</label>
+                <input
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    type="number"
+                    name="quantity"
+                    step="0.01"
+                    min="0.01"
+                    required>
+            </div>
+
+            <div>
+                <label class="mb-1 block font-semibold text-slate-700">Цена</label>
+                <input
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    type="number"
+                    name="unit_price"
+                    step="0.01"
+                    min="0"
+                    required>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button
+                type="submit"
+                class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+                Добавить позицию
+            </button>
+        </div>
+    </form>
+{% endif %}
 <hr class="my-5 border-t border-slate-200">
 
 <h4 class="mb-3 text-lg font-semibold">Добавить комментарий</h4>

@@ -1,85 +1,95 @@
 {% from "_macros.html" import person_name %}
 
 <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-    <table class="min-w-full divide-y divide-slate-200">
-        <thead class="bg-slate-50">
-            <tr>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Название</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Статус</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Клиент</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Оборудование</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Инженер</th>
-                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Стоимость</th>
-            </tr>
-        </thead>
+    <div class="overflow-hidden">
+        <table class="w-full table-fixed divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="w-16 px-3 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
+                    <th class="w-[22%] px-3 py-3 text-left text-sm font-semibold text-slate-700">Название</th>
+                    <th class="w-[18%] px-3 py-3 text-left text-sm font-semibold text-slate-700">Статус</th>
+                    <th class="w-[16%] px-3 py-3 text-left text-sm font-semibold text-slate-700">Клиент</th>
+                    <th class="w-[16%] px-3 py-3 text-left text-sm font-semibold text-slate-700">Оборудование</th>
+                    <th class="w-[16%] px-3 py-3 text-left text-sm font-semibold text-slate-700">Инженер</th>
+                    <th class="w-28 px-3 py-3 text-left text-sm font-semibold text-slate-700">Стоимость</th>
+                </tr>
+            </thead>
 
-        <tbody class="divide-y divide-slate-100">
-        {% for order in orders %}
-            <tr
-                class="orders-row cursor-pointer transition"
-                hx-get="/app/orders/{{ order.id }}/detail"
-                hx-target="#order-detail"
-                hx-swap="innerHTML"
-                onclick="
-                    document.querySelectorAll('.orders-row td').forEach(cell => {
-                        cell.classList.remove('bg-blue-50');
-                    });
-                    this.querySelectorAll('td').forEach(cell => {
-                        cell.classList.add('bg-blue-50');
-                    });
-                ">
-                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">{{ order.id }}</td>
+            <tbody class="divide-y divide-slate-100">
+            {% for order in orders %}
+                <tr
+                    class="orders-row cursor-pointer transition"
+                    hx-get="/app/orders/{{ order.id }}/detail"
+                    hx-target="#order-detail"
+                    hx-swap="innerHTML"
+                    onclick="
+                        document.querySelectorAll('.orders-row td').forEach(cell => {
+                            cell.classList.remove('bg-blue-50');
+                        });
+                        this.querySelectorAll('td').forEach(cell => {
+                            cell.classList.add('bg-blue-50');
+                        });
+                    ">
+                    <td class="px-3 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                        {{ order.id }}
+                    </td>
 
-                <td class="px-4 py-3 text-sm font-medium text-slate-800{% if loop.first %} bg-blue-50{% endif %}">
-                    {{ order.title }}
-                </td>
+                    <td class="px-3 py-3 text-sm font-medium text-slate-800{% if loop.first %} bg-blue-50{% endif %}">
+                        <div class="truncate" title="{{ order.title }}">{{ order.title }}</div>
+                    </td>
 
-                <td class="px-4 py-3 text-sm{% if loop.first %} bg-blue-50{% endif %}">
-                    {% if order.status == "new" %}
-                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
-                    {% elif order.status == "diagnostics" %}
-                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-violet-100 px-2 py-1 text-xs font-medium text-violet-700">Диагностика</span>
-                    {% elif order.status == "estimate_approved" %}
-                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">Смета согласована</span>
-                    {% elif order.status == "in_progress" %}
-                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
-                    {% elif order.status == "done" %}
-                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
-                    {% elif order.status == "awaiting_payment" %}
-                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700">Ожидание оплаты</span>
-                    {% elif order.status == "closed" %}
-                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700">Закрыта</span>
-                    {% else %}
-                        <span class="text-xs text-slate-500">{{ order.status }}</span>
-                    {% endif %}
-                </td>
+                    <td class="px-3 py-3 text-sm min-w-[180px]{% if loop.first %} bg-blue-50{% endif %}">
+                        {% if order.status == "new" %}
+                            <span class="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
+                        {% elif order.status == "diagnostics" %}
+                            <span class="inline-flex items-center whitespace-nowrap rounded-full bg-violet-100 px-2 py-1 text-xs font-medium text-violet-700">Диагностика</span>
+                        {% elif order.status == "estimate_approved" %}
+                            <span class="inline-flex items-center whitespace-nowrap rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">Смета согласована</span>
+                        {% elif order.status == "in_progress" %}
+                            <span class="inline-flex items-center whitespace-nowrap rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
+                        {% elif order.status == "done" %}
+                            <span class="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
+                        {% elif order.status == "awaiting_payment" %}
+                            <span class="inline-flex items-center whitespace-nowrap rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700">Ожидание оплаты</span>
+                        {% elif order.status == "closed" %}
+                            <span class="inline-flex items-center whitespace-nowrap rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700">Закрыта</span>
+                        {% else %}
+                            <span class="text-xs text-slate-500">{{ order.status }}</span>
+                        {% endif %}
+                    </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
-                    {{ order.client.name if order.client else "-" }}
-                </td>
+                    <td class="px-3 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                        <div class="truncate" title="{{ order.client.name if order.client else '-' }}">
+                            {{ order.client.name if order.client else "-" }}
+                        </div>
+                    </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
-                    {{ order.equipment.name if order.equipment else "-" }}
-                </td>
+                    <td class="px-3 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                        <div class="truncate" title="{{ order.equipment.name if order.equipment else '-' }}">
+                            {{ order.equipment.name if order.equipment else "-" }}
+                        </div>
+                    </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
-                    {{ person_name(order.assignee) }}
-                </td>
+                    <td class="px-3 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                        <div class="truncate" title="{{ person_name(order.assignee) }}">
+                            {{ person_name(order.assignee) }}
+                        </div>
+                    </td>
 
-                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
-                    {{ order.total_cost if order.total_cost is not none else "-" }}
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="7" class="px-4 py-6 text-center text-sm text-slate-500">
-                    Заявок нет
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                    <td class="px-3 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                        {{ order.total_cost if order.total_cost is not none else "-" }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="px-4 py-6 text-center text-sm text-slate-500">
+                        Заявок нет
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% if orders %}

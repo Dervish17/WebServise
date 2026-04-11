@@ -64,3 +64,8 @@ class Order(Base):
     assignee = relationship("User", foreign_keys=[assigned_to], back_populates="assigned_orders")
     logs = relationship("OrderLog", back_populates="order")
     status_history = relationship("StatusHistory", back_populates="order")
+    items = relationship(
+        "OrderItem",
+        back_populates="order",
+        order_by="OrderItem.id.asc()",
+    )

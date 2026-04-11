@@ -55,6 +55,8 @@
     --text-xs--line-height: calc(1 / 0.75);
     --text-sm: 0.875rem;
     --text-sm--line-height: calc(1.25 / 0.875);
+    --text-base: 1rem;
+    --text-base--line-height: calc(1.5 / 1);
     --text-lg: 1.125rem;
     --text-lg--line-height: calc(1.75 / 1.125);
     --text-xl: 1.25rem;
@@ -228,6 +230,9 @@
   .static {
     position: static;
   }
+  .start {
+    inset-inline-start: var(--spacing);
+  }
   .mx-auto {
     margin-inline: auto;
   }
@@ -306,6 +311,9 @@
   .h-\[calc\(100vh-160px\)\] {
     height: calc(100vh - 160px);
   }
+  .h-auto {
+    height: auto;
+  }
   .h-full {
     height: 100%;
   }
@@ -317,6 +325,21 @@
   }
   .w-11 {
     width: calc(var(--spacing) * 11);
+  }
+  .w-16 {
+    width: calc(var(--spacing) * 16);
+  }
+  .w-28 {
+    width: calc(var(--spacing) * 28);
+  }
+  .w-\[16\%\] {
+    width: 16%;
+  }
+  .w-\[18\%\] {
+    width: 18%;
+  }
+  .w-\[22\%\] {
+    width: 22%;
   }
   .w-full {
     width: 100%;
@@ -345,17 +368,32 @@
   .min-w-\[320px\] {
     min-width: 320px;
   }
+  .min-w-\[420px\] {
+    min-width: 420px;
+  }
+  .min-w-\[700px\] {
+    min-width: 700px;
+  }
   .min-w-full {
     min-width: 100%;
   }
   .flex-1 {
     flex: 1;
   }
+  .flex-\[1\.2\] {
+    flex: 1.2;
+  }
+  .flex-\[1\.6\] {
+    flex: 1.6;
+  }
   .flex-\[2\] {
     flex: 2;
   }
   .shrink-0 {
     flex-shrink: 0;
+  }
+  .table-fixed {
+    table-layout: fixed;
   }
   .cursor-pointer {
     cursor: pointer;
@@ -438,6 +476,9 @@
   }
   .overflow-hidden {
     overflow: hidden;
+  }
+  .overflow-x-auto {
+    overflow-x: auto;
   }
   .overflow-y-auto {
     overflow-y: auto;
@@ -568,6 +609,9 @@
   .p-8 {
     padding: calc(var(--spacing) * 8);
   }
+  .px-1 {
+    padding-inline: calc(var(--spacing) * 1);
+  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -623,6 +667,10 @@
   .text-3xl {
     font-size: var(--text-3xl);
     line-height: var(--tw-leading, var(--text-3xl--line-height));
+  }
+  .text-base {
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
   }
   .text-lg {
     font-size: var(--text-lg);
@@ -883,6 +931,11 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
+  .md\:grid-cols-4 {
+    @media (width >= 48rem) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
   .lg\:flex {
     @media (width >= 64rem) {
       display: flex;
@@ -906,6 +959,36 @@
   .lg\:justify-between {
     @media (width >= 64rem) {
       justify-content: space-between;
+    }
+  }
+  .xl\:h-\[calc\(100vh-160px\)\] {
+    @media (width >= 80rem) {
+      height: calc(100vh - 160px);
+    }
+  }
+  .xl\:h-full {
+    @media (width >= 80rem) {
+      height: 100%;
+    }
+  }
+  .xl\:w-\[460px\] {
+    @media (width >= 80rem) {
+      width: 460px;
+    }
+  }
+  .xl\:shrink-0 {
+    @media (width >= 80rem) {
+      flex-shrink: 0;
+    }
+  }
+  .xl\:flex-row {
+    @media (width >= 80rem) {
+      flex-direction: row;
+    }
+  }
+  .xl\:items-start {
+    @media (width >= 80rem) {
+      align-items: flex-start;
     }
   }
 }

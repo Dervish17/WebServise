@@ -17,6 +17,7 @@ from app.models.user import User
 from app.services.auth_service import login_user
 from app.services.document_service import build_act_pdf, build_estimate_pdf
 from app.services.report_service import build_reports_context, parse_report_dates
+from app.services.order_item_service import add_order_item, delete_order_item
 from app.services.client_service import (
     create_client,
     delete_client,
@@ -1083,6 +1084,62 @@ def assign_order_ui(
     response.headers["HX-Trigger"] = "refreshOrders"
     return response
 
+@router.post("/app/orders/{order_id}/items/add")
+def add_order_item_ui(
+    order_id: int,
+    request: Request,
+    db: DbSession,
+    _current_user: ManagerOrAdminUser,
+    title: str = Form(...),
+    quantity: str = Form(...),
+    unit_price: str = Form(...),
+):
+    try:
+        add_order_item(
+            db=db,
+            order_id=order_id,
+            title=title,
+            quantity=quantity,
+            unit_price=unit_price,
+        )
+    except HTTPException as exc:
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
+
+    response = render_order_detail(request, db, order_id)
+    response.headers["HX-Trigger"] = '{"refreshOrders": true, "refreshMyOrders": true}'
+    return response
+
+
+@router.delete("/app/orders/{order_id}/items/{item_id}")
+def delete_order_item_ui(
+    order_id: int,
+    item_id: int,
+    request: Request,
+    db: DbSession,
+    _current_user: ManagerOrAdminUser,
+):
+    try:
+        delete_order_item(
+            db=db,
+            order_id=order_id,
+            item_id=item_id,
+        )
+    except HTTPException as exc:
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
+
+    response = render_order_detail(request, db, order_id)
+    response.headers["HX-Trigger"] = '{"refreshOrders": true, "refreshMyOrders": true}'
+    return response
 
 @router.post("/app/orders/{order_id}/edit")
 def edit_order_submit(

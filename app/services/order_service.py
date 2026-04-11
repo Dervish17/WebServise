@@ -9,6 +9,7 @@ from app.models.order_log import OrderLog
 from app.models.user import User
 from app.models.client import Client
 from app.models.status_history import StatusHistory
+from app.models.order_item import OrderItem
 
 ALLOWED_TRANSITIONS = {
     OrderStatus.new.value: [OrderStatus.diagnostics.value],
@@ -183,6 +184,7 @@ def get_order_by_id(db: Session, order_id: int) -> Order:
             joinedload(Order.equipment),
             joinedload(Order.creator),
             joinedload(Order.assignee),
+            joinedload(Order.items),
         )
         .filter(Order.id == order_id)
         .first()
@@ -363,7 +365,9 @@ def update_order(
 
     order.title = title
     order.description = description
-    order.total_cost = total_cost
+
+    if not order.items:
+        order.total_cost = total_cost
 
     db.commit()
     db.refresh(order)
@@ -376,6 +380,7 @@ def delete_order(db: Session, order_id: int) -> None:
 
     db.query(OrderLog).filter(OrderLog.order_id == order.id).delete()
     db.query(StatusHistory).filter(StatusHistory.order_id == order.id).delete()
+    db.query(OrderItem).filter(OrderItem.order_id == order.id).delete()
 
     db.delete(order)
     db.commit()

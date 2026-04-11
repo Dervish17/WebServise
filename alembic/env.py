@@ -12,6 +12,7 @@ from app.models.order import Order
 from app.models.order_log import OrderLog
 from app.models.status_history import StatusHistory
 from app.models.user import User
+from app.models.order_item import OrderItem
 
 load_dotenv()
 

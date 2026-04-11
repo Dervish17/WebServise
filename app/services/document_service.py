@@ -69,6 +69,16 @@ def _money(value: Decimal | float | int | None) -> str:
         return "—"
     return f"{Decimal(value):.2f}".replace(".", ",") + " ₽"
 
+def _qty(value: Decimal | float | int | None) -> str:
+    if value is None:
+        return "—"
+
+    value = Decimal(value)
+    text = f"{value:.2f}"
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return text.replace(".", ",")
+
 
 def _dt(value: datetime | None) -> str:
     if not value:
@@ -164,6 +174,60 @@ def _build_info_table(rows: list[list[str]], col_widths: list[float]):
     )
     return table
 
+def _build_items_table(order: Order):
+    regular_font, bold_font = _register_fonts()
+
+    rows = [["№", "Наименование", "Кол-во", "Цена", "Сумма"]]
+
+    if order.items:
+        for index, item in enumerate(order.items, start=1):
+            rows.append(
+                [
+                    str(index),
+                    item.title or "—",
+                    _qty(item.quantity),
+                    _money(item.unit_price),
+                    _money(item.line_total),
+                ]
+            )
+    else:
+        rows.append(
+            [
+                "1",
+                order.title or "Работы по заявке",
+                "1",
+                _money(order.total_cost),
+                _money(order.total_cost),
+            ]
+        )
+
+    table = Table(
+        rows,
+        colWidths=[12 * mm, 78 * mm, 20 * mm, 28 * mm, 32 * mm],
+        hAlign="LEFT",
+        repeatRows=1,
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("BOX", (0, 0), (-1, -1), 0.6, colors.HexColor("#CBD5E1")),
+                ("INNERGRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#E2E8F0")),
+                ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#EFF6FF")),
+                ("FONTNAME", (0, 0), (-1, 0), bold_font),
+                ("FONTNAME", (0, 1), (-1, -1), regular_font),
+                ("FONTSIZE", (0, 0), (-1, -1), 9),
+                ("LEADING", (0, 0), (-1, -1), 12),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ("ALIGN", (2, 1), (-1, -1), "RIGHT"),
+            ]
+        )
+    )
+    return table
+
 
 def _paragraph(text: str, style) -> Paragraph:
     return Paragraph(escape(text).replace("\n", "<br/>"), style)
@@ -230,11 +294,14 @@ def build_estimate_pdf(order: Order) -> bytes:
     )
     story.append(Spacer(1, 10))
 
-    story.append(_paragraph("Стоимость", styles["subtitle"]))
+    story.append(_paragraph("Позиции сметы", styles["subtitle"]))
+    story.append(_build_items_table(order))
+    story.append(Spacer(1, 10))
+
+    story.append(_paragraph("Итог", styles["subtitle"]))
     story.append(
         _build_info_table(
             [
-                ["Стоимость работ", _money(order.total_cost)],
                 ["Итоговая сумма", _money(order.total_cost)],
             ],
             [55 * mm, 115 * mm],
@@ -312,12 +379,14 @@ def build_act_pdf(order: Order) -> bytes:
     story.append(Spacer(1, 10))
 
     story.append(_paragraph("Выполненные работы", styles["subtitle"]))
+    story.append(_build_items_table(order))
+    story.append(Spacer(1, 10))
+
     story.append(
         _build_info_table(
             [
-                ["Описание работ", order.description or order.title or "—"],
                 ["Результат", "Работы выполнены в полном объёме"],
-                ["Стоимость", _money(order.total_cost)],
+                ["Итоговая стоимость", _money(order.total_cost)],
             ],
             [55 * mm, 115 * mm],
         )
