@@ -1,0 +1,119 @@
+{% from "_macros.html" import person_name %}
+
+<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">ID</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Дата</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Клиент</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Оборудование</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Статус</th>
+                <th class="px-4 py-3 text-left text-sm font-semibold text-slate-700">Действия</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-slate-100">
+        {% for order in orders %}
+            <tr
+                class="orders-row cursor-pointer transition"
+                hx-get="/app/orders/{{ order.id }}/detail"
+                hx-target="#order-detail"
+                hx-swap="innerHTML"
+                onclick="
+                    document.querySelectorAll('.orders-row td').forEach(cell => {
+                        cell.classList.remove('bg-blue-50');
+                    });
+                    this.querySelectorAll('td').forEach(cell => {
+                        cell.classList.add('bg-blue-50');
+                    });
+                ">
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                    {{ order.id }}
+                </td>
+
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                    {{ order.created_at.strftime("%d.%m.%Y") if order.created_at else "-" }}
+                </td>
+
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                    {{ order.client.name if order.client else "-" }}
+                </td>
+
+                <td class="px-4 py-3 text-sm text-slate-700{% if loop.first %} bg-blue-50{% endif %}">
+                    {{ order.equipment.name if order.equipment else "-" }}
+                    {% if order.equipment and order.equipment.model %}
+                        <div class="text-xs text-slate-500">{{ order.equipment.model }}</div>
+                    {% endif %}
+                </td>
+
+                <td class="px-4 py-3 text-sm min-w-[180px]{% if loop.first %} bg-blue-50{% endif %}">
+                    {% if order.status == "new" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">Новая</span>
+                    {% elif order.status == "diagnostics" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-violet-100 px-2 py-1 text-xs font-medium text-violet-700">Диагностика</span>
+                    {% elif order.status == "estimate_approved" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-indigo-100 px-2 py-1 text-xs font-medium text-indigo-700">Смета согласована</span>
+                    {% elif order.status == "in_progress" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">В работе</span>
+                    {% elif order.status == "done" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Выполнена</span>
+                    {% elif order.status == "awaiting_payment" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-700">Ожидание оплаты</span>
+                    {% elif order.status == "closed" %}
+                        <span class="inline-flex items-center whitespace-nowrap rounded-full bg-slate-200 px-2 py-1 text-xs font-medium text-slate-700">Закрыта</span>
+                    {% else %}
+                        <span class="text-xs text-slate-500">{{ order.status }}</span>
+                    {% endif %}
+                </td>
+
+                <td class="px-4 py-3 text-sm{% if loop.first %} bg-blue-50{% endif %}">
+                    <div class="flex flex-wrap gap-2">
+                        {% if order.status == "estimate_approved" %}
+                            <button
+                                type="button"
+                                onclick="event.stopPropagation()"
+                                class="rounded-lg bg-amber-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-amber-700"
+                                hx-post="/app/orders/{{ order.id }}/status"
+                                hx-vals='{"new_status":"in_progress"}'
+                                hx-target="#order-detail"
+                                hx-swap="innerHTML">
+                                Начать ремонт
+                            </button>
+                        {% elif order.status == "in_progress" %}
+                            <button
+                                type="button"
+                                onclick="event.stopPropagation()"
+                                class="rounded-lg bg-green-600 px-3 py-2 text-xs font-medium text-white transition hover:bg-green-700"
+                                hx-post="/app/orders/{{ order.id }}/status"
+                                hx-vals='{"new_status":"done"}'
+                                hx-target="#order-detail"
+                                hx-swap="innerHTML">
+                                Выполнено
+                            </button>
+                        {% else %}
+                            <span class="text-xs text-slate-500">—</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" class="px-4 py-6 text-center text-sm text-slate-500">
+                    Назначенных заявок нет
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if orders %}
+    <div
+        hx-get="/app/orders/{{ orders[0].id }}/detail"
+        hx-trigger="load"
+        hx-target="#order-detail"
+        hx-swap="innerHTML"
+        class="hidden">
+    </div>
+{% endif %}

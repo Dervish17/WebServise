@@ -21,6 +21,9 @@
                 <div class="flex items-center gap-5">
                     <nav class="flex gap-4">
                         <a href="/app/orders" class="font-semibold text-white no-underline hover:text-slate-200">Заявки</a>
+                        {% if has_role(current_user, "engineer") %}
+                            <a href="/app/my-orders" class="font-semibold text-white no-underline hover:text-slate-200">Мои заявки</a>
+                        {% endif %}
                         <a href="/app/clients" class="font-semibold text-white no-underline hover:text-slate-200">Клиенты</a>
                         <a href="/app/equipment" class="font-semibold text-white no-underline hover:text-slate-200">Оборудование</a>
 

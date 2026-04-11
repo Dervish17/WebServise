@@ -172,10 +172,21 @@ def require_manager_or_admin(
         )
     return current_user
 
+def require_engineer(
+    current_user: Annotated[User, Depends(get_current_ui_user)],
+) -> User:
+    if current_user.role != "engineer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Раздел доступен только инженеру.",
+        )
+    return current_user
+
 
 CurrentUser = Annotated[User, Depends(get_current_ui_user)]
 AdminUser = Annotated[User, Depends(require_admin)]
 ManagerOrAdminUser = Annotated[User, Depends(require_manager_or_admin)]
+EngineerUser = Annotated[User, Depends(require_engineer)]
 
 
 def get_client_context(db: Session, client_id: int) -> dict:
@@ -762,6 +773,43 @@ def delete_equipment_ui(
 # Orders
 # =========================
 
+@router.get("/app/my-orders")
+def my_orders_page(
+    request: Request,
+    current_user: EngineerUser,
+) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request,
+        "orders/my_orders_page.html",
+        {"current_user": current_user},
+    )
+
+
+@router.get("/app/my-orders/table")
+def my_orders_table(
+    request: Request,
+    db: DbSession,
+    current_user: EngineerUser,
+    status: str | None = None,
+    search: str | None = None,
+    sort: str = "newest",
+) -> HTMLResponse:
+    orders = filter_orders(
+        db=db,
+        status=status,
+        assigned_to=current_user.id,
+        search=search,
+        sort=sort,
+        limit=50,
+        offset=0,
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "orders/_engineer_table.html",
+        {"orders": orders},
+    )
+
 @router.get("/app/orders")
 def orders_page(
     request: Request,
@@ -929,7 +977,7 @@ def change_status_ui(
         )
 
     response = render_order_detail(request, db, order_id)
-    response.headers["HX-Trigger"] = "refreshOrders"
+    response.headers["HX-Trigger"] = '{"refreshOrders": true, "refreshMyOrders": true}'
     return response
 
 

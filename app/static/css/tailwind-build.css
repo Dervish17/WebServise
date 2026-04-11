@@ -309,6 +309,9 @@
   .max-w-md {
     max-width: var(--container-md);
   }
+  .min-w-\[180px\] {
+    min-width: 180px;
+  }
   .min-w-\[280px\] {
     min-width: 280px;
   }

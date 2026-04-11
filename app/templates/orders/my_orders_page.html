@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Мои заявки{% endblock %}
+
+{% block content %}
+<h2 class="mb-4 text-2xl font-bold text-slate-800">Мои заявки</h2>
+
+<div class="mb-4 flex flex-wrap items-end gap-3">
+    <div>
+        <label for="my-order-status" class="mb-1 block font-semibold text-slate-700">Статус</label>
+        <select
+            id="my-order-status"
+            name="status"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/my-orders/table"
+            hx-target="#my-orders-table"
+            hx-swap="innerHTML"
+            hx-include="#my-order-search, #my-order-sort">
+            <option value="">Все</option>
+            <option value="new">Новая</option>
+            <option value="diagnostics">Диагностика</option>
+            <option value="estimate_approved">Смета согласована</option>
+            <option value="in_progress">В работе</option>
+            <option value="done">Выполнена</option>
+            <option value="awaiting_payment">Ожидание оплаты</option>
+            <option value="closed">Закрыта</option>
+        </select>
+    </div>
+
+    <div class="min-w-[280px] flex-1">
+        <label for="my-order-search" class="mb-1 block font-semibold text-slate-700">Поиск</label>
+        <input
+            id="my-order-search"
+            name="search"
+            type="text"
+            placeholder="Название, клиент, оборудование..."
+            class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/my-orders/table"
+            hx-trigger="input changed delay:400ms"
+            hx-target="#my-orders-table"
+            hx-swap="innerHTML"
+            hx-include="#my-order-status, #my-order-sort">
+    </div>
+
+    <div>
+        <label for="my-order-sort" class="mb-1 block font-semibold text-slate-700">Сортировка</label>
+        <select
+            id="my-order-sort"
+            name="sort"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            hx-get="/app/my-orders/table"
+            hx-target="#my-orders-table"
+            hx-swap="innerHTML"
+            hx-include="#my-order-status, #my-order-search">
+            <option value="newest">Сначала новые</option>
+            <option value="oldest">Сначала старые</option>
+        </select>
+    </div>
+</div>
+
+<div class="flex items-start gap-5 h-[calc(100vh-160px)]">
+    <div
+        id="my-orders-table"
+        class="flex-[2] overflow-auto"
+        hx-get="/app/my-orders/table"
+        hx-trigger="load, refreshMyOrders from:body"
+        hx-swap="innerHTML">
+        Загрузка...
+    </div>
+
+    <div
+        id="order-detail"
+        class="min-w-[320px] flex-1 overflow-y-auto rounded-xl bg-white p-4 shadow-sm h-full">
+        Выбери заявку
+    </div>
+</div>
+{% endblock %}
