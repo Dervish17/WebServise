@@ -5,6 +5,7 @@
 {% block content %}
 <h2 class="mb-4 text-2xl font-bold text-slate-800">Клиенты</h2>
 
+{% if request.state.current_user and request.state.current_user.role in ["admin", "manager"] %}
 <form
     hx-post="/app/clients/create"
     hx-target="#clients-table"
@@ -72,6 +73,7 @@
         </button>
     </div>
 </form>
+{% endif %}
 <div class="mb-4 flex flex-wrap items-end gap-3">
     <div class="min-w-[280px] flex-1">
         <label for="client-search" class="mb-1 block font-semibold text-slate-700">Поиск по клиентам</label>

@@ -2,6 +2,7 @@
 
 <h3 class="mb-4 text-xl font-bold text-slate-800">Заявка #{{ order.id }}</h3>
 
+{% if request.state.current_user and request.state.current_user.role in ["admin", "manager"] %}
 <div class="mb-4 flex flex-wrap gap-2">
     <button
         class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
@@ -20,6 +21,7 @@
         Удалить
     </button>
 </div>
+{% endif %}
 
 <p class="mb-2"><strong>Название:</strong> {{ order.title }}</p>
 <p class="mb-2"><strong>Описание:</strong> {{ order.description }}</p>
@@ -86,6 +88,7 @@
 <p class="mb-2"><strong>Создал:</strong> {{ person_name(order.creator) }}</p>
 <p class="mb-2"><strong>Исполнитель:</strong> {{ person_name(order.assignee) }}</p>
 
+{% if request.state.current_user and request.state.current_user.role in ["admin", "manager"] %}
 <form
     hx-post="/app/orders/{{ order.id }}/assign"
     hx-target="#order-detail"
@@ -107,6 +110,7 @@
         Назначить инженера
     </button>
 </form>
+{% endif %}
 
 <p class="mb-4"><strong>Стоимость:</strong> {{ order.total_cost if order.total_cost is not none else "-" }}</p>
 

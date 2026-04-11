@@ -10,48 +10,70 @@
 </head>
 <body class="bg-slate-100 text-slate-800">
 
+{% set is_login_page = request.url.path == "/app/login" %}
+{% set current_user = request.state.current_user %}
+
     <header class="bg-slate-800 text-white">
         <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <h1 class="text-2xl font-bold">Профсервис</h1>
 
-            <div class="flex items-center gap-5">
-                <nav class="flex gap-4">
-                    <a href="/app/orders" class="font-semibold text-white no-underline hover:text-slate-200">Заявки</a>
-                    <a href="/app/clients" class="font-semibold text-white no-underline hover:text-slate-200">Клиенты</a>
-                    <a href="/app/equipment" class="font-semibold text-white no-underline hover:text-slate-200">Оборудование</a>
-                    <a href="/app/users" class="font-semibold text-white no-underline hover:text-slate-200">Пользователи</a>
-                    <a href="/app/profile" class="font-semibold text-blue-600 hover:text-blue-700">Мой профиль</a>
-                </nav>
+            {% if current_user and not is_login_page %}
+                <div class="flex items-center gap-5">
+                    <nav class="flex gap-4">
+                        <a href="/app/orders" class="font-semibold text-white no-underline hover:text-slate-200">Заявки</a>
+                        <a href="/app/clients" class="font-semibold text-white no-underline hover:text-slate-200">Клиенты</a>
+                        <a href="/app/equipment" class="font-semibold text-white no-underline hover:text-slate-200">Оборудование</a>
 
-                {% if request.state.current_user %}
+                        {% if current_user.role == "admin" %}
+                            <a href="/app/users" class="font-semibold text-white no-underline hover:text-slate-200">Пользователи</a>
+                        {% endif %}
+
+                        <a href="/app/profile" class="font-semibold text-white no-underline hover:text-slate-200">Мой профиль</a>
+                    </nav>
+
                     <div class="text-right text-sm text-white">
                         <div>
-                            {{ request.state.current_user.last_name or "" }}
-                            {{ request.state.current_user.first_name or "" }}
-                            {{ request.state.current_user.middle_name or "" }}
+                            {{ current_user.last_name or "" }}
+                            {{ current_user.first_name or "" }}
+                            {{ current_user.middle_name or "" }}
                         </div>
                         <div class="opacity-80">
-                            {% if request.state.current_user.role == "admin" %}
+                            {% if current_user.role == "admin" %}
                                 Администратор
-                            {% elif request.state.current_user.role == "manager" %}
+                            {% elif current_user.role == "manager" %}
                                 Менеджер
-                            {% elif request.state.current_user.role == "engineer" %}
+                            {% elif current_user.role == "engineer" %}
                                 Инженер
                             {% else %}
-                                {{ user.role }}
+                                {{ current_user.role }}
                             {% endif %}
                         </div>
                     </div>
 
                     <a href="/app/logout" class="font-semibold text-white no-underline hover:text-slate-200">Выход</a>
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
         </div>
     </header>
 
     <main class="mx-auto max-w-7xl px-4 py-6">
+         <div id="global-alert" class="mb-4"></div>
         {% block content %}{% endblock %}
     </main>
+
+    <script>
+        function getCookie(name) {
+            const match = document.cookie.match(new RegExp("(^|;\\s*)" + name + "=([^;]+)"));
+            return match ? decodeURIComponent(match[2]) : null;
+        }
+
+        document.body.addEventListener("htmx:configRequest", function (event) {
+            const token = getCookie("csrf_token");
+            if (token) {
+                event.detail.headers["X-CSRF-Token"] = token;
+            }
+        });
+    </script>
 
 </body>
 </html>

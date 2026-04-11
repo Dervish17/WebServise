@@ -153,9 +153,20 @@ def require_admin(current_user: Annotated[User, Depends(get_current_ui_user)]) -
         )
     return current_user
 
+def require_manager_or_admin(
+    current_user: Annotated[User, Depends(get_current_ui_user)],
+) -> User:
+    if current_user.role not in {"admin", "manager"}:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Недостаточно прав для выполнения этого действия.",
+        )
+    return current_user
+
 
 CurrentUser = Annotated[User, Depends(get_current_ui_user)]
 AdminUser = Annotated[User, Depends(require_admin)]
+ManagerOrAdminUser = Annotated[User, Depends(require_manager_or_admin)]
 
 
 def get_client_context(db: Session, client_id: int) -> dict:
@@ -385,6 +396,7 @@ def login_submit(
 def logout() -> RedirectResponse:
     response = RedirectResponse(url="/app/login", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie("access_token", path="/")
+    response.delete_cookie("csrf_token", path="/")
     return response
 
 
@@ -446,7 +458,7 @@ def edit_client_form(
     client_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
 ) -> HTMLResponse:
     client = get_client_by_id(db, client_id)
 
@@ -461,7 +473,7 @@ def edit_client_form(
 def create_client_ui(
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     name: str = Form(...),
     contact_person: str | None = Form(default=None),
     phone: str | None = Form(default=None),
@@ -480,7 +492,12 @@ def create_client_ui(
             notes=notes,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     clients = get_all_clients(db)
 
@@ -498,7 +515,7 @@ def edit_client_submit(
     client_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     name: str = Form(...),
     contact_person: str | None = Form(default=None),
     phone: str | None = Form(default=None),
@@ -518,7 +535,12 @@ def edit_client_submit(
             notes=notes,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     return render_client_detail(request, db, client_id)
 
@@ -528,13 +550,18 @@ def delete_client_ui(
     client_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     redirect_to_list: bool = False,
 ):
     try:
         delete_client(db, client_id)
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     if redirect_to_list:
         response = HTMLResponse("")
@@ -545,13 +572,16 @@ def delete_client_ui(
     response.headers["HX-Trigger"] = "refreshClients"
     return response
 
+# =========================
+# Equipment
+# =========================
 
 @router.post("/app/clients/{client_id}/equipment/create")
 def create_equipment_ui(
     client_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     name: str = Form(...),
     model: str | None = Form(default=None),
     serial_number: str | None = Form(default=None),
@@ -567,14 +597,14 @@ def create_equipment_ui(
             manufacturer=manufacturer,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     return render_client_detail(request, db, client_id)
-
-
-# =========================
-# Equipment
-# =========================
 
 @router.get("/app/equipment")
 def equipment_page(
@@ -630,7 +660,7 @@ def edit_equipment_form(
     equipment_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
 ) -> HTMLResponse:
     equipment = get_equipment_by_id(db, equipment_id)
 
@@ -646,7 +676,7 @@ def edit_equipment_submit(
     equipment_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     name: str = Form(...),
     model: str | None = Form(default=None),
     serial_number: str | None = Form(default=None),
@@ -662,7 +692,12 @@ def edit_equipment_submit(
             manufacturer=manufacturer,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     return render_equipment_detail(request, db, equipment_id)
 
@@ -672,13 +707,18 @@ def delete_equipment_ui(
     equipment_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     redirect_to_list: bool = False,
 ):
     try:
         delete_equipment(db, equipment_id)
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     if redirect_to_list:
         response = HTMLResponse("")
@@ -764,7 +804,7 @@ def edit_order_form(
     order_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
 ) -> HTMLResponse:
     order = get_order_by_id(db, order_id)
 
@@ -779,7 +819,7 @@ def edit_order_form(
 def create_order_ui(
     request: Request,
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: ManagerOrAdminUser,
     title: str = Form(...),
     description: str | None = Form(default=None),
     equipment_id: int = Form(...),
@@ -795,7 +835,12 @@ def create_order_ui(
             total_cost=total_cost,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#create-order-result",
+        )
 
     response = templates.TemplateResponse(
         request,
@@ -822,7 +867,12 @@ def add_comment_ui(
             current_user=current_user,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     return render_order_detail(request, db, order_id)
 
@@ -843,7 +893,12 @@ def change_status_ui(
             current_user=current_user,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     response = render_order_detail(request, db, order_id)
     response.headers["HX-Trigger"] = "refreshOrders"
@@ -866,7 +921,12 @@ def assign_order_ui(
             current_user=current_user,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     response = render_order_detail(request, db, order_id)
     response.headers["HX-Trigger"] = "refreshOrders"
@@ -878,7 +938,7 @@ def edit_order_submit(
     order_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     title: str = Form(...),
     description: str | None = Form(default=None),
     total_cost: float | None = Form(default=None),
@@ -892,7 +952,12 @@ def edit_order_submit(
             total_cost=total_cost,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     return render_order_detail(request, db, order_id)
 
@@ -902,13 +967,18 @@ def delete_order_ui(
     order_id: int,
     request: Request,
     db: DbSession,
-    _current_user: CurrentUser,
+    _current_user: ManagerOrAdminUser,
     redirect_to_list: bool = False,
 ):
     try:
         delete_order(db, order_id)
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#global-alert",
+        )
 
     if redirect_to_list:
         response = HTMLResponse("")

@@ -1,10 +1,26 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+
+from app.core.enums import UserRole
+from app.core.security import hash_password, verify_password
 from app.models.order import Order
 from app.models.order_log import OrderLog
 from app.models.status_history import StatusHistory
 from app.models.user import User
-from app.core.security import hash_password, verify_password
+
+
+def _normalize_email(email: str) -> str:
+    return email.strip().lower()
+
+
+def _validate_role(role: str) -> str:
+    allowed_roles = {item.value for item in UserRole}
+    if role not in allowed_roles:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Недопустимая роль пользователя",
+        )
+    return role
 
 
 def create_user(
@@ -16,6 +32,22 @@ def create_user(
     first_name: str | None = None,
     middle_name: str | None = None,
 ) -> User:
+    email = _normalize_email(email)
+    role = _validate_role(role)
+
+    if len(password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Пароль должен быть не короче 6 символов",
+        )
+
+    existing_user = db.query(User).filter(User.email == email).first()
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Пользователь с таким email уже существует",
+        )
+
     user = User(
         email=email,
         hashed_password=hash_password(password),
@@ -31,6 +63,7 @@ def create_user(
 
     return user
 
+
 def update_user(
     db: Session,
     user_id: int,
@@ -45,6 +78,20 @@ def update_user(
     if not user:
         raise ValueError("User not found")
 
+    email = _normalize_email(email)
+    role = _validate_role(role)
+
+    existing_user = (
+        db.query(User)
+        .filter(User.email == email, User.id != user_id)
+        .first()
+    )
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Пользователь с таким email уже существует",
+        )
+
     user.email = email
     user.role = role
     user.last_name = last_name
@@ -55,6 +102,7 @@ def update_user(
     db.refresh(user)
 
     return user
+
 
 def delete_user(
     db: Session,
@@ -106,6 +154,7 @@ def delete_user(
     db.delete(user)
     db.commit()
 
+
 def toggle_user_active(
     db: Session,
     user_id: int,
@@ -132,6 +181,7 @@ def toggle_user_active(
 
     return user
 
+
 def change_user_password(
     db: Session,
     user_id: int,
@@ -152,9 +202,16 @@ def change_user_password(
             detail="Текущий пароль введён неверно",
         )
 
+    if len(new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Новый пароль должен быть не короче 6 символов",
+        )
+
     user.hashed_password = hash_password(new_password)
 
     db.commit()
+
 
 def update_profile(
     db: Session,
@@ -171,6 +228,8 @@ def update_profile(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Пользователь не найден",
         )
+
+    email = _normalize_email(email)
 
     existing_user = (
         db.query(User)
