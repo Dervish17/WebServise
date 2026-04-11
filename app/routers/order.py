@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -23,14 +25,21 @@ from app.services.order_service import (
     get_order_by_id,
 )
 
-router = APIRouter(prefix="/orders", tags=["orders"])
+router = APIRouter(
+    prefix="/orders",
+    tags=["orders"],
+    dependencies=[Depends(get_current_user)],
+)
+
+DbSession = Annotated[Session, Depends(get_db)]
+CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @router.post("/", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 def create_order_endpoint(
     order: OrderCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSession,
+    current_user: CurrentUser,
 ):
     return create_order(
         db=db,
@@ -44,13 +53,13 @@ def create_order_endpoint(
 
 @router.get("/", response_model=list[OrderResponse])
 def get_orders(
+    db: DbSession,
     status: str | None = None,
     client_id: int | None = None,
     assigned_to: int | None = None,
     created_by: int | None = None,
     limit: int = 10,
     offset: int = 0,
-    db: Session = Depends(get_db),
 ):
     return filter_orders(
         db=db,
@@ -64,7 +73,7 @@ def get_orders(
 
 
 @router.get("/{order_id}", response_model=OrderResponse)
-def get_order(order_id: int, db: Session = Depends(get_db)):
+def get_order(order_id: int, db: DbSession):
     return get_order_by_id(db, order_id)
 
 
@@ -72,8 +81,8 @@ def get_order(order_id: int, db: Session = Depends(get_db)):
 def assign_order_endpoint(
     order_id: int,
     data: AssignOrderRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSession,
+    current_user: CurrentUser,
 ):
     return assign_order(
         db=db,
@@ -87,8 +96,8 @@ def assign_order_endpoint(
 def change_status_endpoint(
     order_id: int,
     data: ChangeStatusRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSession,
+    current_user: CurrentUser,
 ):
     return change_status(
         db=db,
@@ -102,8 +111,8 @@ def change_status_endpoint(
 def add_comment_endpoint(
     order_id: int,
     data: CreateCommentRequest,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    db: DbSession,
+    current_user: CurrentUser,
 ):
     return add_comment(
         db=db,
@@ -114,7 +123,7 @@ def add_comment_endpoint(
 
 
 @router.get("/{order_id}/logs", response_model=list[OrderLogResponse])
-def get_order_logs(order_id: int, db: Session = Depends(get_db)):
+def get_order_logs(order_id: int, db: DbSession):
     order = db.query(Order).filter(Order.id == order_id).first()
 
     if not order:

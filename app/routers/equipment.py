@@ -1,7 +1,12 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import get_current_user, require_roles
+from app.core.enums import UserRole
 from app.db.session import get_db
+from app.models.user import User
 from app.schemas.equipment import EquipmentCreate, EquipmentResponse
 from app.services.equipment_service import (
     create_equipment,
@@ -9,13 +14,22 @@ from app.services.equipment_service import (
     get_equipment_by_id,
 )
 
-router = APIRouter(prefix="/equipment", tags=["equipment"])
+router = APIRouter(
+    prefix="/equipment",
+    tags=["equipment"],
+    dependencies=[Depends(get_current_user)],
+)
+
+DbSession = Annotated[Session, Depends(get_db)]
 
 
 @router.post("/", response_model=EquipmentResponse, status_code=status.HTTP_201_CREATED)
 def create_equipment_endpoint(
     data: EquipmentCreate,
-    db: Session = Depends(get_db),
+    db: DbSession,
+    _manager_or_admin: Annotated[
+        User, Depends(require_roles(UserRole.admin, UserRole.manager))
+    ],
 ):
     return create_equipment(
         db=db,
@@ -28,10 +42,10 @@ def create_equipment_endpoint(
 
 
 @router.get("/", response_model=list[EquipmentResponse])
-def get_equipment_endpoint(db: Session = Depends(get_db)):
+def get_equipment_endpoint(db: DbSession):
     return get_all_equipment(db)
 
 
 @router.get("/{equipment_id}", response_model=EquipmentResponse)
-def get_equipment_by_id_endpoint(equipment_id: int, db: Session = Depends(get_db)):
+def get_equipment_by_id_endpoint(equipment_id: int, db: DbSession):
     return get_equipment_by_id(db, equipment_id)

@@ -78,6 +78,25 @@ def render_http_error_alert(request: Request, exc: HTTPException) -> HTMLRespons
         status_code=exc.status_code,
     )
 
+def render_hx_alert(
+    request: Request,
+    text: str,
+    kind: str = "error",
+    target: str | None = None,
+) -> HTMLResponse:
+    response = render_alert(
+        request,
+        text=text,
+        kind=kind,
+        status_code=status.HTTP_200_OK,
+    )
+
+    if target:
+        response.headers["HX-Retarget"] = target
+        response.headers["HX-Reswap"] = "innerHTML"
+
+    return response
+
 
 def get_user_from_token_value(token: str | None, db: Session) -> User | None:
     if not token:
@@ -1083,7 +1102,12 @@ def create_user_ui(
             middle_name=middle_name,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#create-user-result",
+        )
 
     response = templates.TemplateResponse(
         request,
@@ -1117,14 +1141,19 @@ def edit_user_submit(
             middle_name=middle_name,
         )
     except ValueError:
-        return render_alert(
+        return render_hx_alert(
             request,
-            "Пользователь не найден.",
-            "error",
-            status_code=status.HTTP_404_NOT_FOUND,
+            text="Пользователь не найден.",
+            kind="error",
+            target="#user-edit-modal",
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#user-edit-modal",
+        )
 
     response = HTMLResponse("")
     response.headers["HX-Trigger"] = "refreshUsers"
@@ -1139,15 +1168,25 @@ def toggle_user_active_ui(
     current_admin: AdminUser,
 ):
     try:
-        toggle_user_active(
+        user = toggle_user_active(
             db=db,
             user_id=user_id,
             current_user_id=current_admin.id,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#users-alert",
+        )
 
-    response = HTMLResponse("")
+    response = render_hx_alert(
+        request,
+        text="Пользователь активирован." if user.is_active else "Пользователь деактивирован.",
+        kind="success",
+        target="#users-alert",
+    )
     response.headers["HX-Trigger"] = "refreshUsers"
     return response
 
@@ -1166,8 +1205,18 @@ def delete_user_ui(
             current_user_id=current_admin.id,
         )
     except HTTPException as exc:
-        return render_http_error_alert(request, exc)
+        return render_hx_alert(
+            request,
+            text=str(exc.detail),
+            kind="error",
+            target="#users-alert",
+        )
 
-    response = HTMLResponse("")
+    response = render_hx_alert(
+        request,
+        text="Пользователь удалён.",
+        kind="success",
+        target="#users-alert",
+    )
     response.headers["HX-Trigger"] = "refreshUsers"
     return response
