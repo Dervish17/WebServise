@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Страница не найдена{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+    <div class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Ошибка 404
+        </div>
+
+        <h2 class="mb-3 text-3xl font-bold text-slate-800">
+            Страница не найдена
+        </h2>
+
+        <p class="mb-6 text-slate-600">
+            Похоже, такой страницы не существует или ссылка устарела.
+        </p>
+
+        <div class="flex flex-wrap gap-3">
+            <a
+                href="/app/orders"
+                class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+                К заявкам
+            </a>
+
+            <a
+                href="/app/clients"
+                class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800">
+                К клиентам
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

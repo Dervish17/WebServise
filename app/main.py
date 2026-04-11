@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.db.session import SessionLocal
 
 from app import models
@@ -12,6 +14,7 @@ from app.routers import client, equipment
 from app.routers.ui import router as ui_router, get_user_from_token_value
 
 app = FastAPI()
+templates = Jinja2Templates(directory="app/templates")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -21,6 +24,45 @@ app.include_router(order_router)
 app.include_router(client.router)
 app.include_router(equipment.router)
 app.include_router(ui_router)
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if request.url.path.startswith("/app"):
+        if exc.status_code == 403:
+            return templates.TemplateResponse(
+                request,
+                "errors/403.html",
+                {},
+                status_code=403,
+            )
+
+        if exc.status_code == 404:
+            return templates.TemplateResponse(
+                request,
+                "errors/404.html",
+                {},
+                status_code=404,
+            )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+@app.exception_handler(Exception)
+async def custom_internal_exception_handler(request: Request, exc: Exception):
+    if request.url.path.startswith("/app"):
+        return templates.TemplateResponse(
+            request,
+            "errors/500.html",
+            {},
+            status_code=500,
+        )
+
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error"},
+    )
 
 @app.middleware("http")
 async def ui_auth_middleware(request: Request, call_next):

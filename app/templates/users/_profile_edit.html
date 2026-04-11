@@ -1,0 +1,62 @@
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h3 class="mb-4 text-xl font-bold text-slate-800">Редактирование профиля</h3>
+
+    <form
+        hx-post="/app/profile/edit"
+        hx-target="#profile-edit-block"
+        hx-swap="innerHTML"
+        hx-on::after-request="if(event.detail.successful) document.getElementById('profile-edit-block').innerHTML = ''">
+
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-slate-700">Фамилия</label>
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="text"
+                name="last_name"
+                value="{{ user.last_name or '' }}">
+        </div>
+
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-slate-700">Имя</label>
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="text"
+                name="first_name"
+                value="{{ user.first_name or '' }}">
+        </div>
+
+        <div class="mb-4">
+            <label class="mb-1 block font-semibold text-slate-700">Отчество</label>
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="text"
+                name="middle_name"
+                value="{{ user.middle_name or '' }}">
+        </div>
+
+        <div class="mb-5">
+            <label class="mb-1 block font-semibold text-slate-700">Email</label>
+            <input
+                class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                type="email"
+                name="email"
+                value="{{ user.email }}"
+                required>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
+            <button
+                type="submit"
+                class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+                Сохранить
+            </button>
+
+            <button
+                type="button"
+                class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
+                onclick="document.getElementById('profile-edit-block').innerHTML = ''">
+                Отмена
+            </button>
+        </div>
+    </form>
+</div>

@@ -4,7 +4,7 @@ from app.models.order import Order
 from app.models.order_log import OrderLog
 from app.models.status_history import StatusHistory
 from app.models.user import User
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 
 
 def create_user(
@@ -131,3 +131,67 @@ def toggle_user_active(
     db.refresh(user)
 
     return user
+
+def change_user_password(
+    db: Session,
+    user_id: int,
+    current_password: str,
+    new_password: str,
+) -> None:
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    if not verify_password(current_password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Текущий пароль введён неверно",
+        )
+
+    user.hashed_password = hash_password(new_password)
+
+    db.commit()
+
+def update_profile(
+    db: Session,
+    user_id: int,
+    email: str,
+    last_name: str | None = None,
+    first_name: str | None = None,
+    middle_name: str | None = None,
+) -> tuple[User, bool]:
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+
+    existing_user = (
+        db.query(User)
+        .filter(User.email == email, User.id != user_id)
+        .first()
+    )
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Пользователь с таким email уже существует",
+        )
+
+    old_email = user.email
+
+    user.email = email
+    user.last_name = last_name
+    user.first_name = first_name
+    user.middle_name = middle_name
+
+    db.commit()
+    db.refresh(user)
+
+    email_changed = old_email != user.email
+    return user, email_changed

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Мой профиль{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-2xl">
+    <div
+        id="profile-summary"
+        hx-get="/app/profile/summary"
+        hx-trigger="load, refreshProfile from:body"
+        hx-swap="innerHTML">
+        Загрузка...
+    </div>
+
+    <div id="profile-edit-block" class="mt-5"></div>
+</div>
+
+<div class="mx-auto mt-6 max-w-2xl">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="mb-4 text-xl font-bold text-slate-800">Смена пароля</h3>
+
+        <form
+            hx-post="/app/profile/change-password"
+            hx-target="#change-password-result"
+            hx-swap="innerHTML"
+            hx-on::after-request="if(event.detail.successful) this.reset()">
+
+            <div class="mb-4">
+                <label class="mb-1 block font-semibold text-slate-700">Текущий пароль</label>
+                <input
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    type="password"
+                    name="current_password"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label class="mb-1 block font-semibold text-slate-700">Новый пароль</label>
+                <input
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    type="password"
+                    name="new_password"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label class="mb-1 block font-semibold text-slate-700">Подтверждение нового пароля</label>
+                <input
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    type="password"
+                    name="new_password_confirm"
+                    required>
+            </div>
+
+            <button
+                type="submit"
+                class="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700">
+                Сменить пароль
+            </button>
+
+            <div id="change-password-result" class="mt-4"></div>
+        </form>
+    </div>
+</div>
+{% endblock %}

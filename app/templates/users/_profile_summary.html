@@ -1,0 +1,40 @@
+<div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <h2 class="mb-5 text-2xl font-bold text-slate-800">Мой профиль</h2>
+
+    <div class="mb-4">
+        <button
+            class="rounded-lg bg-slate-700 px-4 py-2 font-medium text-white transition hover:bg-slate-800"
+            hx-get="/app/profile/edit"
+            hx-target="#profile-edit-block"
+            hx-swap="innerHTML">
+            Редактировать профиль
+        </button>
+    </div>
+
+    <div class="space-y-3">
+        <p><strong>Фамилия:</strong> {{ user.last_name or "-" }}</p>
+        <p><strong>Имя:</strong> {{ user.first_name or "-" }}</p>
+        <p><strong>Отчество:</strong> {{ user.middle_name or "-" }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p>
+            <strong>Роль:</strong>
+            {% if user.role == "admin" %}
+                Администратор
+            {% elif user.role == "manager" %}
+                Менеджер
+            {% elif user.role == "engineer" %}
+                Инженер
+            {% else %}
+                {{ user.role }}
+            {% endif %}
+        </p>
+        <p>
+            <strong>Статус:</strong>
+            {% if user.is_active %}
+                <span class="rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">Активен</span>
+            {% else %}
+                <span class="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">Неактивен</span>
+            {% endif %}
+        </p>
+    </div>
+</div>
