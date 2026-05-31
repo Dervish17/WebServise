@@ -2,7 +2,6 @@ import os
 import subprocess
 import sys
 import threading
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -41,6 +40,13 @@ def _cleanup_old_backups(backup_dir: Path, keep_last: int) -> None:
         old_backup.unlink(missing_ok=True)
 
 
+def _get_keep_last() -> int:
+    keep_last = int(os.getenv("BACKUP_KEEP_LAST", "10"))
+    if keep_last <= 0:
+        raise ValueError("BACKUP_KEEP_LAST must be greater than zero")
+    return keep_last
+
+
 def _run_backup() -> None:
     root = _project_root()
     script_path = root / "scripts" / "backup_db.py"
@@ -51,20 +57,25 @@ def _run_backup() -> None:
 
     print("[backup] Запуск автоматического резервного копирования")
 
-    result = subprocess.run(
-        [sys.executable, str(script_path)],
-        cwd=str(root),
-        text=True,
-        capture_output=True,
-    )
+    try:
+        result = subprocess.run(
+            [sys.executable, str(script_path)],
+            cwd=str(root),
+            text=True,
+            capture_output=True,
+        )
+    except Exception as error:
+        print(f"[backup] Не удалось запустить резервное копирование: {error}")
+        return
 
     if result.returncode == 0:
         print("[backup] Резервная копия успешно создана")
 
         backup_dir_name = os.getenv("BACKUP_DIR", "backups")
-        keep_last = int(os.getenv("BACKUP_KEEP_LAST", "10"))
-
-        _cleanup_old_backups(root / backup_dir_name, keep_last)
+        try:
+            _cleanup_old_backups(root / backup_dir_name, _get_keep_last())
+        except (OSError, ValueError) as error:
+            print(f"[backup] Не удалось удалить старые резервные копии: {error}")
     else:
         print("[backup] Ошибка при создании резервной копии")
         print(result.stderr)
@@ -74,7 +85,11 @@ def _scheduler_loop() -> None:
     backup_time = os.getenv("AUTO_BACKUP_TIME", "02:00")
 
     while not _stop_event.is_set():
-        next_run = _get_next_run_time(backup_time)
+        try:
+            next_run = _get_next_run_time(backup_time)
+        except ValueError as error:
+            print(f"[backup] Некорректное значение AUTO_BACKUP_TIME={backup_time!r}: {error}")
+            return
         print(f"[backup] Следующее резервное копирование: {next_run:%Y-%m-%d %H:%M}")
 
         while datetime.now() < next_run:
@@ -93,6 +108,13 @@ def start_backup_scheduler() -> None:
         return
 
     if _scheduler_thread and _scheduler_thread.is_alive():
+        return
+
+    try:
+        _get_next_run_time(os.getenv("AUTO_BACKUP_TIME", "02:00"))
+        _get_keep_last()
+    except ValueError as error:
+        print(f"[backup] Некорректные настройки автоматического резервного копирования: {error}")
         return
 
     _stop_event.clear()

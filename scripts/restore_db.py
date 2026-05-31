@@ -4,6 +4,7 @@ from pathlib import Path
 from db_utils import (
     find_pg_binary,
     get_db_parts,
+    get_pg_env,
     load_settings,
     require_docker_container,
     run_command,
@@ -28,7 +29,7 @@ def recreate_public_schema_local(db: dict, psql: str) -> None:
             "-U", db["username"],
             "-d", db["database"],
             "-c", sql,
-        ])
+        ], env=get_pg_env(db))
 
 
 def recreate_public_schema_docker(container: str, db: dict) -> None:
@@ -68,7 +69,7 @@ def restore_via_local_pg_restore(settings: dict, db: dict, backup_file: str) -> 
         "--no-owner",
         "--no-privileges",
         backup_file,
-    ])
+    ], env=get_pg_env(db))
 
 
 def restore_via_docker(settings: dict, db: dict, backup_file: str) -> None:

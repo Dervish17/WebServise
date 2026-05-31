@@ -15,8 +15,20 @@ from app.routers import client, equipment
 from app.routers.ui import router as ui_router, get_user_from_token_value
 from app.core.csrf import generate_csrf_token
 from app.core.template_helpers import can_manage, has_role, is_admin
+from app.services.backup_scheduler import start_backup_scheduler, stop_backup_scheduler
 
 app = FastAPI()
+
+@app.on_event("startup")
+def on_startup() -> None:
+    start_backup_scheduler()
+
+
+@app.on_event("shutdown")
+def on_shutdown() -> None:
+    stop_backup_scheduler()
+
+
 templates = Jinja2Templates(directory="app/templates")
 templates.env.globals["has_role"] = has_role
 templates.env.globals["is_admin"] = is_admin

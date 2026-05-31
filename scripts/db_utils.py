@@ -1,6 +1,7 @@
 import os
 import shutil
 import subprocess
+from contextlib import contextmanager
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -88,7 +89,51 @@ def require_docker_container(container_name: str) -> str:
     return container_name
 
 
-def run_command(cmd: list[str]) -> None:
-    result = subprocess.run(cmd, text=True)
+def get_pg_env(db: dict) -> dict[str, str]:
+    env = os.environ.copy()
+    if db["password"]:
+        env["PGPASSWORD"] = db["password"]
+    return env
+
+
+@contextmanager
+def backup_lock(backup_dir: Path):
+    lock_file = backup_dir / ".backup.lock"
+    file = lock_file.open("a+", encoding="utf-8")
+
+    try:
+        if os.name == "nt":
+            import msvcrt
+
+            file.seek(0)
+            if not file.read(1):
+                file.seek(0)
+                file.write(" ")
+                file.flush()
+            file.seek(0)
+            msvcrt.locking(file.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        file.close()
+        raise RuntimeError(
+            "Резервное копирование уже выполняется."
+        )
+
+    try:
+        yield
+    finally:
+        if os.name == "nt":
+            file.seek(0)
+            msvcrt.locking(file.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+        file.close()
+
+
+def run_command(cmd: list[str], *, env: dict[str, str] | None = None) -> None:
+    result = subprocess.run(cmd, text=True, env=env)
     if result.returncode != 0:
         raise SystemExit(f"Ошибка выполнения команды: {' '.join(cmd)}")
