@@ -33,3 +33,7 @@ archive.zip
 
 .env
 .env.*
+
+backups/
+*.dump
+*.sql

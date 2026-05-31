@@ -197,6 +197,49 @@
                 event.detail.headers["X-CSRF-Token"] = token;
             }
         });
+
+        let orderDetailScrollTop = null;
+
+        function restoreOrderDetailScroll(target) {
+            if (!target || orderDetailScrollTop === null) {
+                return;
+            }
+
+            target.scrollTop = Math.max(
+                0,
+                Math.min(orderDetailScrollTop, target.scrollHeight - target.clientHeight)
+            );
+        }
+
+        document.body.addEventListener("htmx:beforeSwap", function (event) {
+            const target = event.detail.target;
+            const trigger = event.detail.elt;
+
+            if (target && target.id === "order-detail" && trigger && target.contains(trigger)) {
+                orderDetailScrollTop = target.scrollTop;
+            } else {
+                orderDetailScrollTop = null;
+            }
+        });
+
+        document.body.addEventListener("htmx:afterSwap", function (event) {
+            const target = event.detail.target;
+
+            if (target && target.id === "order-detail") {
+                requestAnimationFrame(function () {
+                    restoreOrderDetailScroll(target);
+                });
+            }
+        });
+
+        document.body.addEventListener("htmx:afterSettle", function (event) {
+            const target = event.detail.target;
+
+            if (target && target.id === "order-detail") {
+                restoreOrderDetailScroll(target);
+                orderDetailScrollTop = null;
+            }
+        });
     </script>
 
 </body>

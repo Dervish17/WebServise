@@ -156,31 +156,18 @@ async def ui_auth_middleware(request: Request, call_next):
         if is_mutating:
             csrf_header = request.headers.get("X-CSRF-Token")
 
-            if (
-                not csrf_cookie
+            if (not csrf_cookie
                 or not csrf_header
-                or not hmac.compare_digest(csrf_cookie, csrf_header)
-            ):
+                or not hmac.compare_digest(csrf_cookie, csrf_header)):
                 if is_htmx:
-                    response = templates.TemplateResponse(
-                        request,
-                        "shared/_alert.html",
-                        {
-                            "text": "CSRF validation failed. Обновите страницу и повторите действие.",
-                            "kind": "error",
-                        },
-                        status_code=200,
-                    )
+                    response = templates.TemplateResponse(request,"shared/_alert.html",
+                        {"text": "CSRF validation failed. Обновите страницу и повторите действие.",
+                            "kind": "error",},status_code=200,)
                     response.headers["HX-Retarget"] = "#global-alert"
                     response.headers["HX-Reswap"] = "innerHTML"
                     return response
 
-                return templates.TemplateResponse(
-                    request,
-                    "errors/403.html",
-                    {},
-                    status_code=403,
-                )
+                return templates.TemplateResponse(request,"errors/403.html",{},status_code=403,)
 
     response = await call_next(request)
 

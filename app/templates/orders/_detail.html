@@ -211,7 +211,7 @@
                     <td class="px-3 py-2 text-sm text-slate-800">{{ item.title }}</td>
                     <td class="px-3 py-2 text-sm text-slate-700">{{ item.quantity }}</td>
                     <td class="px-3 py-2 text-sm text-slate-700">{{ item.unit_price }}</td>
-                    <td class="px-3 py-2 text-sm text-slate-700">{{ item.line_total }}</td>
+                    <td class="px-3 py-2 text-sm text-slate-700">{{ "%.2f"|format(item.line_total) }}</td>
                     {% if can_manage(request.state.current_user) %}
                         <td class="px-4 py-3 text-sm">
                             <button
@@ -325,6 +325,37 @@
 
 <hr class="my-5 border-t border-slate-200">
 
+<h4 class="mb-3 text-lg font-semibold">История статусов</h4>
+
+{% if status_logs %}
+    <div class="relative pl-6">
+        <div class="absolute left-[11px] top-1 bottom-1 w-0.5 bg-slate-200"></div>
+
+        {% for log in status_logs %}
+            <div class="relative mb-4 last:mb-0">
+                <div class="absolute -left-6 top-2 h-3 w-3 rounded-full border-2 border-white bg-blue-600 shadow-sm"></div>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                    <div class="mb-1 flex items-center justify-between gap-3">
+                        <div class="font-semibold text-slate-800">Смена статуса</div>
+                        <div class="text-xs text-slate-500 whitespace-nowrap">
+                            {{ log.created_at.strftime("%d.%m.%Y %H:%M") if log.created_at else "-" }}
+                        </div>
+                    </div>
+
+                    <div class="text-sm text-slate-700">
+                        {{ log.description }}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-slate-500">История смены статусов пока пуста.</p>
+{% endif %}
+
+<hr class="my-5 border-t border-slate-200">
+
 <h4 class="mb-3 text-lg font-semibold">История действий</h4>
 
 {% for log in logs %}
@@ -334,8 +365,6 @@
                 Создание заявки
             {% elif log.action == "assign" %}
                 Назначение инженера
-            {% elif log.action == "status_change" %}
-                Смена статуса
             {% else %}
                 {{ log.action }}
             {% endif %}

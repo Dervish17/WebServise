@@ -247,11 +247,21 @@ def get_order_context(db: Session, order_id: int) -> dict:
         .all()
     )
 
+    status_logs = (
+        db.query(OrderLog)
+        .filter(
+            OrderLog.order_id == order_id,
+            OrderLog.action == "status_change",
+        )
+        .order_by(OrderLog.created_at.desc())
+        .all()
+    )
+
     logs = (
         db.query(OrderLog)
         .filter(
             OrderLog.order_id == order_id,
-            OrderLog.action != "comment",
+            OrderLog.action.notin_(["comment", "status_change"]),
         )
         .order_by(OrderLog.created_at.desc())
         .all()
@@ -270,6 +280,7 @@ def get_order_context(db: Session, order_id: int) -> dict:
     return {
         "order": order,
         "comments": comments,
+        "status_logs": status_logs,
         "logs": logs,
         "engineers": engineers,
     }
